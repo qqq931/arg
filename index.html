@@ -7,9 +7,7 @@
 <link rel="stylesheet" href="assets/css/blog.css">
 </head>
 <body data-page="blog">
-
 <div id="progress-bar"></div>
-
 <nav class="navbar">
   <div class="logo">📡 记忆碎片 <span>—— 在信号里</span></div>
   <div class="nav-links">
@@ -25,17 +23,14 @@
     <button id="theme-toggle" title="切换主题">☀️</button>
   </div>
 </nav>
-
 <div class="page-header">
   <h1>记忆碎片</h1>
   <div class="subtitle" id="typewriter-sub"></div>
 </div>
-
 <div class="container">
   <main class="main-content" id="posts-container">
     <!-- Posts injected by JS -->
   </main>
-
   <aside class="sidebar">
     <!-- About -->
     <div class="widget about-me">
@@ -45,7 +40,6 @@
       <p>25岁，普通上班族</p>
       <p class="quote">"这个人很懒，什么也没留下"</p>
     </div>
-
     <!-- Search -->
     <div class="widget">
       <h3>🔍 搜索</h3>
@@ -53,13 +47,11 @@
         <input type="text" id="search-input" placeholder="搜索文章...">
       </div>
     </div>
-
     <!-- Tags -->
     <div class="widget">
       <h3>🏷️ 标签</h3>
       <div class="tags-cloud" id="tags-cloud"></div>
     </div>
-
     <!-- Calendar -->
     <div class="widget calendar-widget">
       <h3>📅 日历</h3>
@@ -70,7 +62,6 @@
       </div>
       <div class="cal-grid" id="cal-grid"></div>
     </div>
-
     <!-- Weather -->
     <div class="widget">
       <h3>🌤️ 天气</h3>
@@ -82,14 +73,12 @@
         <div class="icon">☀️</div>
       </div>
     </div>
-
     <!-- Visitor counter -->
     <div class="widget visitor-counter">
       <h3 style="text-align:left">👁️ 访客</h3>
       <div class="number" id="visitor-count">000000</div>
       <div class="label">次访问 · 信号覆盖中</div>
     </div>
-
     <!-- Music -->
     <div class="widget">
       <h3>🎵 正在播放</h3>
@@ -102,7 +91,6 @@
         <button class="music-play" id="music-play-btn">▶</button>
       </div>
     </div>
-
     <!-- Friend links -->
     <div class="widget">
       <h3>🔗 友情链接</h3>
@@ -116,20 +104,16 @@
     </div>
   </aside>
 </div>
-
 <footer>
   <p>© 2026 记忆碎片 · 博主：小夏 · <span class="signal">📡 信号满格</span></p>
   <p style="margin-top:4px;">"制作人:杨晨硕 作品部分使用AI技术"</p>
 </footer>
-
 <button id="back-to-top" title="返回顶部">↑</button>
-
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
   <span class="close" id="lightbox-close">&times;</span>
   <img id="lightbox-img" src="" alt="">
 </div>
-
 <!-- 首次访问：困惑开场 -->
 <div class="confusion-overlay" id="confusion-overlay">
   <div class="confusion-content">
@@ -138,7 +122,6 @@
     <button class="confusion-btn" id="confusion-btn" style="display:none;">解锁手机</button>
   </div>
 </div>
-
 <script src="assets/js/common.js"></script>
 <script>
 // ========== Blog Data ==========
@@ -326,7 +309,6 @@ const posts = [
     likes: 34
   }
 ];
-
 // Preset comments
 const presetComments = {
   1: [
@@ -364,14 +346,12 @@ const presetComments = {
     { author: '妈妈', time: '2026-01-01 12:00', text: '写得挺好的，别老想着以前的事了，往前看。' }
   ]
 };
-
 // ========== Render Posts ==========
 let currentFilter = null;
 let searchQuery = '';
 const reactions = ARG.storage.get('reactions', {});
 const likes = ARG.storage.get('likes', {});
 const userComments = ARG.storage.get('comments', {});
-
 function renderPosts() {
   const container = document.getElementById('posts-container');
   let filtered = posts;
@@ -439,7 +419,6 @@ function renderPosts() {
       <button class="read-more" data-toggle="${post.id}">阅读全文 ▼</button>
     </article>`;
   }).join('');
-
   // Bind events
   container.querySelectorAll('.read-more').forEach(btn => {
     btn.onclick = () => {
@@ -518,7 +497,6 @@ function renderPosts() {
     };
   });
 }
-
 // Tags cloud
 function renderTags() {
   const allTags = [...new Set(posts.flatMap(p => p.tags))];
@@ -535,7 +513,6 @@ function renderTags() {
     };
   });
 }
-
 // Calendar
 let calDate = new Date(2026, 7, 1);
 function renderCalendar() {
@@ -563,13 +540,11 @@ function renderCalendar() {
 }
 document.getElementById('cal-prev').onclick = () => { calDate.setMonth(calDate.getMonth()-1); renderCalendar(); };
 document.getElementById('cal-next').onclick = () => { calDate.setMonth(calDate.getMonth()+1); renderCalendar(); };
-
 // Search
 document.getElementById('search-input').oninput = (e) => {
   searchQuery = e.target.value;
   renderPosts();
 };
-
 // Lightbox close
 document.getElementById('lightbox-close').onclick = () => {
   document.getElementById('lightbox').classList.remove('show');
@@ -577,14 +552,12 @@ document.getElementById('lightbox-close').onclick = () => {
 document.getElementById('lightbox').onclick = (e) => {
   if (e.target.id === 'lightbox') document.getElementById('lightbox').classList.remove('show');
 };
-
 // Reading progress
 window.addEventListener('scroll', () => {
   const h = document.documentElement;
   const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
   document.getElementById('progress-bar').style.width = pct + '%';
 });
-
 // Typewriter subtitle — 困惑开头
 const subtitleText = '手机在凌晨两点震动了。屏幕上是一个我以为再也不会亮起的名字。';
 let subIdx = 0;
@@ -598,7 +571,6 @@ function typeSubtitle() {
     el.classList.add('typewriter');
   }
 }
-
 // Visitor counter animation
 function animateCounter() {
   const target = 1024823;
@@ -611,7 +583,6 @@ function animateCounter() {
     el.textContent = String(Math.floor(current)).padStart(7, '0');
   }, 25);
 }
-
 // Music player toggle
 document.getElementById('music-play-btn').onclick = () => {
   const player = document.getElementById('music-player');
@@ -619,25 +590,14 @@ document.getElementById('music-play-btn').onclick = () => {
   player.classList.toggle('playing');
   btn.textContent = player.classList.contains('playing') ? '⏸' : '▶';
 };
-
 // ========== 首次访问：困惑开场动画 ==========
-let initConfusionIntro = function() {
-  // 读取标记，ARG.storage内部就是读写localStorage
+(function initConfusionIntro() {
   if (ARG.storage.get('seenIntro')) return;
-
   const overlay = document.getElementById('confusion-overlay');
-  // 保护：如果弹窗DOM已经被删除，直接退出
-  if(!overlay) return;
-
   const icon = document.getElementById('confusion-icon');
   const text = document.getElementById('confusion-text');
   const btn = document.getElementById('confusion-btn');
-
   overlay.classList.add('show');
-  // 重置状态
-  btn.style.display = 'none';
-  overlay.style.opacity = '1';
-
   const lines = [
     { icon: '☑', text: '游玩前须知:本arg部分使用ai技术且无任何恐怖画面，不适请自行离开' },
     { icon: '😴', text: '……头好疼。' },
@@ -651,8 +611,8 @@ let initConfusionIntro = function() {
       btn.style.display = 'inline-block';
       btn.textContent = '📱 解锁手机，看看发生了什么';
       btn.onclick = () => {
-        // ❗不再remove删除DOM！只移除show类隐藏，保留元素用于下次弹出
-        overlay.classList.remove('show');
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 500);
         ARG.storage.set('seenIntro', true);
       };
       return;
@@ -670,14 +630,7 @@ let initConfusionIntro = function() {
     setTimeout(next, 2000);
   }
   setTimeout(next, 1000);
-};
-// 暴露到全局，控制台可以调用
-window.initConfusionIntro = initConfusionIntro;
-
-// 页面加载自动执行一次
-initConfusionIntro();
-
-
+})();
 // Init
 renderPosts();
 renderTags();
