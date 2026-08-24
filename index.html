@@ -599,7 +599,9 @@ document.getElementById('music-play-btn').onclick = () => {
   const btn = document.getElementById('confusion-btn');
   overlay.classList.add('show');
   const lines = [
-    { icon: '☑', text: '游玩前须知:本arg部分使用ai技术且无任何恐怖画面，不适请自行离开' },
+    { icon: '☑', text: '制作人:杨晨硕 辅助:Coze AI' },
+    { icon: '☑', text: '推荐1920*1080获得最佳体验' },
+    { icon: '☑', text: '游玩前须知:本arg无任何恐怖画面与声音解密' },
     { icon: '😴', text: '……头好疼。' },
     { icon: '😟', text: '等等，现在几点了？' },
     { icon: '📱', text: '手机在震？' },
@@ -627,9 +629,9 @@ document.getElementById('music-play-btn').onclick = () => {
       icon.style.transform = 'scale(1)';
     }, 200);
     idx++;
-    setTimeout(next, 2000);
+    setTimeout(next, 3000);
   }
-  setTimeout(next, 1000);
+  setTimeout(next, 5000);
 })();
 // Init
 renderPosts();
