@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小夏的手机</title>
+<link rel="stylesheet" href="assets/css/phone.css">
+</head>
+<body>
+
+<div class="phone-wrapper">
+  <div class="phone-frame">
+    <div class="phone-notch"></div>
+    <div class="phone-screen" id="phone-screen">
+
+      <!-- 状态栏 -->
+      <div class="status-bar">
+        <span class="time" id="status-time">02:17</span>
+        <div class="status-icons">
+          <span class="signal-bars">
+            <i></i><i></i><i></i><i></i>
+          </span>
+          <span class="battery">
+            <div class="battery-level"></div>
+            <div class="battery-tip"></div>
+          </span>
+        </div>
+      </div>
+
+      <!-- 通知层 -->
+      <div class="notifications" id="notifications">
+        <!-- 动态注入 -->
+      </div>
+
+      <!-- 锁屏时钟（首次进入） -->
+      <div class="lock-screen" id="lock-screen">
+        <div class="lock-date" id="lock-date"></div>
+        <div class="lock-clock" id="lock-clock">02:17</div>
+        <div class="lock-hint">
+          <span class="fingerprint">👆</span>
+          上滑解锁
+        </div>
+        <div class="lock-notification" id="lock-notification">
+          <div class="ln-icon">📧</div>
+          <div class="ln-content">
+            <div class="ln-title">安全邮箱</div>
+            <div class="ln-body">memory_00：给25岁的小夏</div>
+          </div>
+          <div class="ln-time">现在</div>
+        </div>
+      </div>
+
+      <!-- 主屏幕 -->
+      <div class="home-screen" id="home-screen" style="display:none;">
+        <!-- 搜索栏 -->
+        <div class="spotlight">
+          <span class="search-glyph">🔍</span>
+          <span class="search-text">搜索</span>
+        </div>
+
+        <!-- App 网格 -->
+        <div class="app-grid" id="app-grid">
+          <!-- 威信 — 有未读消息 -->
+          <div class="app-icon" data-app="wechat" onclick="openApp('wechat_login.html')">
+            <div class="icon-img icon-wechat">💬</div>
+            <span class="app-label">威信</span>
+            <div class="app-badge" id="wechat-badge">3</div>
+          </div>
+
+          <!-- 安全邮箱 — 有新邮件 -->
+          <div class="app-icon" data-app="email" onclick="openApp('email.html')">
+            <div class="icon-img icon-mail">📧</div>
+            <span class="app-label">安全邮箱</span>
+            <div class="app-badge" id="email-badge">1</div>
+          </div>
+
+          <!-- 高嘚地图 -->
+          <div class="app-icon" data-app="map" onclick="openApp('map.html')">
+            <div class="icon-img icon-map">🗺️</div>
+            <span class="app-label">高嘚地图</span>
+          </div>
+
+          <!-- 浏览器（论坛） -->
+          <div class="app-icon" data-app="forum" onclick="openApp('forum.html')">
+            <div class="icon-img icon-browser">🌐</div>
+            <span class="app-label">天芽浏览器</span>
+          </div>
+
+          <!-- 电话 -->
+          <div class="app-icon" data-app="phone" onclick="showToast('电话功能暂不可用')">
+            <div class="icon-img icon-phone">📞</div>
+            <span class="app-label">电话</span>
+            <div class="app-badge">3</div>
+          </div>
+
+          <!-- 信息 -->
+          <div class="app-icon" data-app="message" onclick="showToast('信息功能暂不可用')">
+            <div class="icon-img icon-msg">💚</div>
+            <span class="app-label">信息</span>
+          </div>
+
+          <!-- 相册 -->
+          <div class="app-icon" data-app="photos" onclick="showToast('相册是空的')">
+            <div class="icon-img icon-photos">🖼️</div>
+            <span class="app-label">相册</span>
+          </div>
+
+          <!-- 备忘录 -->
+          <div class="app-icon" data-app="notes" onclick="showNotes()">
+            <div class="icon-img icon-notes">📝</div>
+            <span class="app-label">备忘录</span>
+          </div>
+
+          <!-- 设置 -->
+          <div class="app-icon" data-app="settings" onclick="showToast('设置不可用')">
+            <div class="icon-img icon-settings">⚙️</div>
+            <span class="app-label">设置</span>
+          </div>
+
+          <!-- 天气 -->
+          <div class="app-icon" data-app="weather" onclick="showToast('北京 · 晴 · 26°C')">
+            <div class="icon-img icon-weather">☀️</div>
+            <span class="app-label">天气</span>
+          </div>
+
+          <!-- 时钟 -->
+          <div class="app-icon" data-app="clock" onclick="showToast('现在是凌晨 02:17')">
+            <div class="icon-img icon-clock">🕐</div>
+            <span class="app-label">时钟</span>
+          </div>
+
+          <!-- 加密存档（隐藏入口） -->
+          <div class="app-icon" data-app="archive" onclick="openApp('archive.html')" id="archive-app" style="opacity:0.3;">
+            <div class="icon-img icon-archive">🔐</div>
+            <span class="app-label">???</span>
+          </div>
+        </div>
+
+        <!-- 页面指示器 -->
+        <div class="page-dots">
+          <span class="dot active"></span>
+          <span class="dot"></span>
+        </div>
+
+        <!-- Dock -->
+        <div class="dock">
+          <div class="app-icon dock-icon" onclick="openApp('wechat_login.html')">
+            <div class="icon-img icon-wechat">💬</div>
+          </div>
+          <div class="app-icon dock-icon" onclick="openApp('email.html')">
+            <div class="icon-img icon-mail">📧</div>
+          </div>
+          <div class="app-icon dock-icon" onclick="openApp('map.html')">
+            <div class="icon-img icon-map">🗺️</div>
+          </div>
+          <div class="app-icon dock-icon" onclick="openApp('forum.html')">
+            <div class="icon-img icon-browser">🌐</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App 打开过渡 -->
+      <div class="app-transition" id="app-transition"></div>
+
+    </div>
+  </div>
+
+  <!-- 返回博客入口（手机外） -->
+  <a href="index.html" class="back-to-blog">← 返回博客</a>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- 备忘录弹窗 -->
+<div class="notes-modal" id="notes-modal">
+  <div class="notes-content">
+    <div class="notes-header">
+      <span>📝 备忘录</span>
+      <button onclick="closeNotes()">✕</button>
+    </div>
+    <div class="notes-body">
+      <div class="note-item">
+        <div class="note-title">🔑 密码提示</div>
+        <div class="note-text">天芽、高嘚、威信的首字母<br>爸打错了字——"嘚"不是"德"</div>
+      </div>
+      <div class="note-item">
+        <div class="note-title">📡 坐标</div>
+        <div class="note-text">39.903, 116.4<br>工号0003 · 1998年第一基站</div>
+      </div>
+      <div class="note-item">
+        <div class="note-title">🔑 铁皮柜钥匙</div>
+        <div class="note-text">搬家时信封里找到的，刻着"003"<br>爸书房的旧柜子——别忘了打开</div>
+      </div>
+      <div class="note-item note-locked" id="note-locked">
+        <div class="note-title">🔒 ???</div>
+        <div class="note-text">还有一条备忘，需要先找到其他线索...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== 时间显示 ==========
+function updateTime() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const timeStr = `${h}:${m}`;
+  document.getElementById('status-time').textContent = timeStr;
+  document.getElementById('lock-clock').textContent = timeStr;
+
+  const days = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  const dateStr = `2026年8月23日 ${days[now.getDay()]}`;
+  document.getElementById('lock-date').textContent = dateStr;
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+// ========== 解锁 ==========
+const lockScreen = document.getElementById('lock-screen');
+const homeScreen = document.getElementById('home-screen');
+let startY = 0;
+
+lockScreen.addEventListener('touchstart', e => { startY = e.touches[0].clientY; });
+lockScreen.addEventListener('touchmove', e => {
+  const diff = startY - e.touches[0].clientY;
+  if (diff > 0) lockScreen.style.transform = `translateY(-${diff}px)`;
+});
+lockScreen.addEventListener('touchend', e => {
+  const diff = startY - (e.changedTouches[0].clientY);
+  if (diff > 80) unlockPhone();
+  else lockScreen.style.transform = '';
+});
+
+// 鼠标也支持
+lockScreen.addEventListener('mousedown', e => { startY = e.clientY; });
+lockScreen.addEventListener('mousemove', e => {
+  if (startY) {
+    const diff = startY - e.clientY;
+    if (diff > 0) lockScreen.style.transform = `translateY(-${diff}px)`;
+  }
+});
+document.addEventListener('mouseup', e => {
+  if (startY) {
+    const diff = startY - e.clientY;
+    if (diff > 80) unlockPhone();
+    else lockScreen.style.transform = '';
+    startY = 0;
+  }
+});
+
+// 点击通知直接解锁
+document.getElementById('lock-notification').addEventListener('click', unlockPhone);
+
+function unlockPhone() {
+  lockScreen.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+  lockScreen.style.transform = 'translateY(-100%)';
+  lockScreen.style.opacity = '0';
+  setTimeout(() => {
+    lockScreen.style.display = 'none';
+    homeScreen.style.display = 'block';
+    homeScreen.classList.add('show');
+    showNotifications();
+  }, 400);
+}
+
+// ========== 通知 ==========
+function showNotifications() {
+  const notifs = [
+    { icon: '📧', app: '安全邮箱', title: 'memory_00@oldmail.com', body: '给25岁的小夏', delay: 500 },
+    { icon: '💬', app: '威信', title: '老李', body: '小夏，看到邮件了吧？你爸让我帮他设的...', delay: 1500 },
+    { icon: '📞', app: '电话', title: '未接来电', body: '妈妈 (3)', delay: 2500 },
+  ];
+
+  notifs.forEach(n => {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'notification-banner';
+      el.innerHTML = `
+        <div class="notif-icon" style="background:${n.app==='威信'?'#07c160':'#007aff'}">${n.icon}</div>
+        <div class="notif-content">
+          <div class="notif-title">${n.title}</div>
+          <div class="notif-body">${n.body}</div>
+        </div>
+        <div class="notif-time">现在</div>
+      `;
+      el.onclick = () => {
+        if (n.app === '安全邮箱') location.href = 'email.html';
+        else if (n.app === '威信') location.href = 'wechat_login.html';
+        else showToast('妈妈打了3个电话，回一个吧');
+      };
+      document.getElementById('notifications').appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-20px)';
+        setTimeout(() => el.remove(), 300);
+      }, 4000);
+    }, n.delay);
+  });
+}
+
+// ========== App 打开 ==========
+function openApp(url) {
+  const trans = document.getElementById('app-transition');
+  trans.style.background = 'var(--screen-bg)';
+  trans.style.opacity = '1';
+  trans.style.transform = 'scale(1)';
+  setTimeout(() => { location.href = url; }, 300);
+}
+
+// ========== Toast ==========
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ========== 备忘录 ==========
+function showNotes() {
+  document.getElementById('notes-modal').classList.add('show');
+}
+function closeNotes() {
+  document.getElementById('notes-modal').classList.remove('show');
+}
+
+// ========== 彩蛋：点击时间10次解锁隐藏app ==========
+let timeClicks = 0;
+document.getElementById('status-time').addEventListener('click', () => {
+  timeClicks++;
+  if (timeClicks >= 10) {
+    const archive = document.getElementById('archive-app');
+    archive.style.opacity = '1';
+    archive.style.animation = 'pulse-glow 1s infinite';
+    showToast('🔓 发现隐藏应用：加密存档');
+    timeClicks = 0;
+  }
+});
+
+// ========== 彩蛋：Konami Code ==========
+let konami = [];
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+document.addEventListener('keydown', e => {
+  konami.push(e.key);
+  if (konami.length > konamiCode.length) konami.shift();
+  if (konami.join(',') === konamiCode.join(',')) {
+    document.body.style.animation = 'rainbow 2s infinite';
+    showToast('📡 信号满格！爸爸看到你了。');
+    setTimeout(() => document.body.style.animation = '', 3000);
+  }
+});
+</script>
+
+<style>
+@keyframes rainbow {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我在地图上发现了一个不存在的坐标 - 天芽论坛</title>
+<link rel="stylesheet" href="assets/css/forum.css">
+</head>
+<body data-page="forum">
+
+<div class="top-bar">
+  <div>
+    <a href="index.html">天芽首页</a> |
+    <span class="nav-links">
+      <a href="index.html">博客</a>
+      <a href="forum.html">论坛</a>
+      <a href="map.html">地图</a>
+      <a href="wechat.html">威信</a>
+      <a href="email.html">邮箱</a>
+      <a href="archive.html">存档</a>
+    </span>
+  </div>
+  <div>
+    <span class="clock" id="forum-clock"></span> |
+    <a href="#">设为首页</a> |
+    <a href="#">收藏本站</a>
+  </div>
+</div>
+
+<div class="forum-header">
+  <div class="forum-logo">
+    天芽论坛
+    <span class="small">—— 全球华人的网上家园</span>
+  </div>
+  <div class="header-search">
+    <input type="text" placeholder="搜索帖子..." id="forum-search">
+    <button onclick="alert('搜索功能维护中')">搜索</button>
+  </div>
+</div>
+
+<div class="forum-nav">
+  <a href="#">≡ 首页</a>
+  <a href="#">📢 站务区</a>
+  <a href="#">💬 灌水乐园</a>
+  <a href="#">🔬 科技探索</a>
+  <a href="#">🗺️ 地图迷踪</a>
+  <a href="#">📖 情感天地</a>
+  <a href="#">❓ 求助区</a>
+</div>
+
+<div class="breadcrumb">
+  <a href="#">天芽论坛</a> › <a href="#">科技探索</a › <a href="#">地图迷踪</a> › 浏览帖子
+</div>
+
+<div class="forum-container">
+  <main>
+    <div class="thread-container" id="thread-container">
+      <div class="thread-title-bar">
+        <h1 id="thread-title">我在地图上发现了一个不存在的坐标</h1>
+        <div class="actions">
+          <button onclick="toggleOnlyOP()" id="only-op-btn">只看楼主</button>
+          <button onclick="changeFontSize('small')" class="font-btn">小</button>
+          <button onclick="changeFontSize('medium')" class="font-btn active" id="default-font">中</button>
+          <button onclick="changeFontSize('large')" class="font-btn">大</button>
+        </div>
+      </div>
+
+      <!-- Original Post -->
+      <div class="post-row" id="post-op">
+        <div class="post-sidebar">
+          <div class="avatar" id="op-avatar" data-clicks="0">📡</div>
+          <div class="username">memory_00</div>
+          <div class="user-title">论坛元老</div>
+          <div class="post-count">帖子: 47</div>
+          <div class="signature">信号满格。<br>—— 2012</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>发表于：2012-11-15 23:47</span>
+            <span class="post-floor">楼主</span>
+          </div>
+          <div class="post-body font-medium" id="op-body">
+            <p>各位，我在地图上发现了一个奇怪的坐标。</p>
+            <p>那个位置在街景里是<span class="keyword">一片空地<span class="tooltip-box">2008年带女儿去的时候基站已经拆了</span></span>，但我的GPS设备显示那里曾经有建筑。</p>
+            <p>这个坐标附近有一个<span class="keyword">废弃基站<span class="tooltip-box">他参与建设的第一个基站，1998年</span></span>，但官方记录里查不到。</p>
+            <p>我查了很多资料，这个坐标：<strong>39.903, 116.4</strong></p>
+            <p>有人知道这是怎么回事吗？</p>
+            <p style="margin-top:1em;color:var(--accent2);"><span class="keyword">别查了，他只是在不远处看着你<span class="tooltip-box">这是父亲对女儿说的话</span></span>。</p>
+            <div class="post-actions">
+              <button class="vote-btn upvote" onclick="vote(this,'up')">👍 <span class="count">42</span></button>
+              <button class="vote-btn downvote" onclick="vote(this,'down')">👎 <span class="count">3</span></button>
+              <button onclick="quotePost()">引用</button>
+              <button>举报</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply 1 -->
+      <div class="post-row reply-post">
+        <div class="post-sidebar">
+          <div class="avatar" style="background:#5a8ad4;">🧭</div>
+          <div class="username">地图爱好者</div>
+          <div class="user-title">注册会员</div>
+          <div class="post-count">帖子: 203</div>
+          <div class="signature">路在脚下</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>回复于：2012-11-16 08:23</span>
+            <span class="post-floor">1楼</span>
+          </div>
+          <div class="post-body font-medium">
+            <p>这个坐标我也注意到了。你试试加上<span class="keyword">偏移量0.003<span class="tooltip-box">0.003度≈300米，也是老夏工号003的暗示</span></span>，可能会有不同的结果。</p>
+            <p>39.906, 116.403？</p>
+            <div class="post-actions">
+              <button class="vote-btn" onclick="vote(this,'up')">👍 <span class="count">18</span></button>
+              <button onclick="quotePost()">引用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply 2 - base64 -->
+      <div class="post-row reply-post">
+        <div class="post-sidebar">
+          <div class="avatar" style="background:#8a6ad4;">🔐</div>
+          <div class="username">memory_00</div>
+          <div class="user-title">论坛元老</div>
+          <div class="post-count">帖子: 47</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>回复于：2012-11-16 22:15</span>
+            <span class="post-floor">2楼</span>
+          </div>
+          <div class="post-body font-medium">
+            <p>谢谢楼上。我试了。</p>
+            <p>另外，我学会了一个新东西，叫base64编码。据说可以把文字变成乱码，只有知道方法的人才能看懂。</p>
+            <div class="b64-block" id="b64-text">5bCP5aSP77yM546L546L5L2c5ZOB55So5LqG5LqG5Y67</div>
+            <button class="decode-btn" onclick="decodeB64()">点此解码</button>
+            <div class="decoded-result" id="b64-result"></div>
+            <div class="post-actions">
+              <button class="vote-btn" onclick="vote(this,'up')">👍 <span class="count">25</span></button>
+              <button onclick="quotePost()">引用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply 3 - filler -->
+      <div class="post-row reply-post">
+        <div class="post-sidebar">
+          <div class="avatar" style="background:#e8a040;">💧</div>
+          <div class="username">路人打水</div>
+          <div class="user-title">初级会员</div>
+          <div class="post-count">帖子: 12</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>回复于：2012-11-17 14:05</span>
+            <span class="post-floor">3楼</span>
+          </div>
+          <div class="post-body font-medium">
+            <p>前排围观！楼主说的好玄乎啊</p>
+            <p>不过那个坐标我用谷歌地球看了一下，真的是空地。可能是军事设施？</p>
+            <div class="post-actions">
+              <button class="vote-btn" onclick="vote(this,'up')">👍 <span class="count">5</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply 4 - 2014 -->
+      <div class="post-row reply-post">
+        <div class="post-sidebar">
+          <div class="avatar" style="background:#777;">👻</div>
+          <div class="username">潜水多年</div>
+          <div class="user-title">中级会员</div>
+          <div class="post-count">帖子: 67</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>回复于：2014-03-22 19:30</span>
+            <span class="post-floor">4楼</span>
+          </div>
+          <div class="post-body font-medium">
+            <p>楼主已经很久没上线了……最后登录时间显示2014年1月。</p>
+            <p>有人认识memory_00吗？这个帖子他后来更新了吗？</p>
+            <div class="post-actions">
+              <button class="vote-btn" onclick="vote(this,'up')">👍 <span class="count">31</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply 5 - mojibake -->
+      <div class="post-row reply-post">
+        <div class="post-sidebar">
+          <div class="avatar" style="background:#d45a5a;">🔧</div>
+          <div class="username">编码错误</div>
+          <div class="user-title">新手上路</div>
+          <div class="post-count">帖子: 3</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>回复于：2014-01-10 03:17</span>
+            <span class="post-floor">5楼</span>
+          </div>
+          <div class="post-body font-medium">
+            <p class="mojibake">ë²ìô¦í`µã�`¶¨¶®¼þ&apos;¢</p>
+            <p>（系统提示：该回复编码异常，部分内容无法显示）</p>
+            <p style="font-size:11px;color:var(--text-dim);margin-top:8px;">
+              <!-- Hint: don't forget to check email -->
+              鼠标悬停有惊喜 → <span class="keyword" title="不要忘了看邮箱">???<span class="tooltip-box">不要忘了看邮箱</span></span>
+            </p>
+            <div class="post-actions">
+              <button>引用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply 6 - 2026 小夏 -->
+      <div class="post-row reply-post">
+        <div class="post-sidebar">
+          <div class="avatar" style="background:var(--accent);">夏</div>
+          <div class="username">小夏夏晚</div>
+          <div class="user-title">新手上路</div>
+          <div class="post-count">帖子: 1</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>回复于：2026-08-23 02:34</span>
+            <span class="post-floor">6楼</span>
+          </div>
+          <div class="post-body font-medium">
+            <p>这是我爸爸12年前发的帖子。</p>
+            <p>他2014年春天去世了。memory_00是他的网名，00是他工号的后缀。</p>
+            <p>我今天才看到这个帖子。他说的"不远处看着你"——</p>
+            <p>我现在明白了。</p>
+            <div class="post-actions">
+              <button class="vote-btn" onclick="vote(this,'up')">👍 <span class="count">89</span></button>
+              <button>引用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply 7 - anonymous -->
+      <div class="post-row reply-post">
+        <div class="post-sidebar">
+          <div class="avatar" style="background:#333;color:#888;">？</div>
+          <div class="username">匿名人士</div>
+          <div class="user-title">匿名</div>
+          <div class="post-count">帖子: ?</div>
+        </div>
+        <div class="post-main">
+          <div class="post-meta-row">
+            <span>回复于：2026-08-23 00:00</span>
+            <span class="post-floor">7楼</span>
+          </div>
+          <div class="post-body font-medium">
+            <p class="highlight-reply">信号会在你25岁生日那天满格。</p>
+            <p>—— 去看看邮箱吧。</p>
+            <div class="post-actions">
+              <button class="vote-btn" onclick="vote(this,'up')">👍 <span class="count">156</span></button>
+              <button>引用</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reply area -->
+      <div class="reply-area" style="position:relative;">
+        <textarea id="reply-text" placeholder="说点什么吧... (提示：试试输入"0.003"或"偏移")"></textarea>
+        <div class="reply-controls">
+          <div class="left">
+            <button class="emoji-btn" id="emoji-toggle">😊</button>
+            <div class="emoji-panel" id="emoji-panel">
+              <span>😊</span><span>😂</span><span>😭</span><span>❤️</span><span>👍</span>
+              <span>🤔</span><span>😮</span><span>😢</span><span>🎉</span><span>📡</span>
+              <span>💡</span><span>🔍</span><span>🌟</span><span>🙏</span><span>👏</span>
+            </div>
+          </div>
+          <button class="submit-reply" onclick="submitReply()">发表回复</button>
+        </div>
+        <div class="hidden-link" id="hidden-link">
+          🔍 你发现了一条隐藏线索！<a href="map.html" style="color:var(--accent);font-weight:bold;">→ 点击前往高嘚地图查看坐标 39.903, 116.4</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+      <span class="disabled">‹ 上一页</span>
+      <span class="current">1</span>
+      <a href="#" onclick="return fakePage(2)">2</a>
+      <a href="#" onclick="return fakePage(3)">3</a>
+      <span class="disabled">...</span>
+      <a href="#" onclick="return fakePage(47)">47</a>
+      <a href="#" onclick="return fakePage(2)">下一页 ›</a>
+    </div>
+  </main>
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="sidebar-panel online-users">
+      <h3>🟢 在线用户 (7)</h3>
+      <div class="content">
+        <div class="user-item memory" onclick="showUserCard(event,'memory_00')">
+          <span class="dot"></span>
+          <span class="uname">memory_00</span>
+        </div>
+        <div class="user-item" onclick="showUserCard(event,'地图爱好者')">
+          <span class="dot"></span><span class="uname">地图爱好者</span>
+        </div>
+        <div class="user-item" onclick="showUserCard(event,'小夏夏晚')">
+          <span class="dot"></span><span class="uname">小夏夏晚</span>
+        </div>
+        <div class="user-item" onclick="showUserCard(event,'匿名人士')">
+          <span class="dot"></span><span class="uname">匿名人士</span>
+        </div>
+        <div class="user-item" onclick="showUserCard(event,'路人打水')">
+          <span class="dot"></span><span class="uname">路人打水</span>
+        </div>
+        <div class="user-item" onclick="showUserCard(event,'潜水多年')">
+          <span class="dot"></span><span class="uname">潜水多年</span>
+        </div>
+        <div class="user-item" onclick="showUserCard(event,'游客')">
+          <span class="dot"></span><span class="uname">游客</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-panel">
+      <h3>📎 相关帖子</h3>
+      <div class="content">
+        <ul class="related-threads">
+          <li><a href="#">北京老基站地图（2010年整理）</a></li>
+          <li><a href="#">[求助] 怎么给邮件设置10年后发送？</a></li>
+          <li><a href="#">有没有人记得工号0003的工程师？</a></li>
+          <li><a href="#">街景里消失的建筑——汇总帖</a></li>
+          <li><a href="#">base64编码教程（新手入门）</a></li>
+          <li><a href="#">一个父亲可以为孩子做多少事</a></li>
+          <li><a href="#" style="color:var(--text-dim);">信号会在满格那天到来</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sidebar-panel">
+      <h3>📊 论坛统计</h3>
+      <div class="content forum-stats">
+        注册用户: 1,247,893<br>
+        帖子总数: 28,456,721<br>
+        今日发帖: 3,421<br>
+        在线用户: 7<br>
+        <span style="color:var(--accent);">memory_00 最后在线: 永远在线</span>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- User card popup -->
+<div class="user-card-popup" id="user-card-popup">
+  <span class="close-card" onclick="this.parentElement.classList.remove('show')">×</span>
+  <div id="user-card-content"></div>
+</div>
+
+<!-- Context menu -->
+<div class="context-menu" id="context-menu">
+  <div class="menu-item" onclick="quotePost()">📋 引用</div>
+  <div class="menu-item" onclick="copyText()">📄 复制</div>
+  <div class="divider"></div>
+  <div class="menu-item danger" onclick="alert('举报已提交（假装的）')">🚫 举报</div>
+</div>
+
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="forum-footer">
+  <p>© 2003-2026 天芽论坛 · 本站内容仅供怀旧交流 · <a href="index.html">返回博客</a></p>
+  <p style="margin-top:4px;">Processed in 0.003 seconds · memory_00 is always online 📡</p>
+</div>
+
+<script src="assets/js/common.js"></script>
+<script>
+// Forum clock
+function updateForumClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('forum-clock').textContent =
+    `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+updateForumClock();
+setInterval(updateForumClock, 1000);
+
+// Base64 decode
+function decodeB64() {
+  const encoded = '5bCP5aSP77yM546L546L5L2c5ZOB55So5LqG5LqG5Y67';
+  try {
+    const decoded = decodeURIComponent(escape(atob(encoded)));
+    const result = document.getElementById('b64-result');
+    result.textContent = '解码结果：' + decoded;
+    result.classList.add('show');
+  } catch(e) {
+    document.getElementById('b64-result').textContent = '解码失败';
+  }
+}
+
+// Vote
+function vote(btn, type) {
+  const countEl = btn.querySelector('.count');
+  let count = parseInt(countEl.textContent);
+  if (btn.classList.contains('upvoted') || btn.classList.contains('downvoted')) return;
+  count++;
+  countEl.textContent = count;
+  btn.classList.add(type === 'up' ? 'upvoted' : 'downvoted');
+}
+
+// OP avatar clicks -> hand drawn smiley
+document.getElementById('op-avatar').addEventListener('click', function() {
+  let clicks = parseInt(this.dataset.clicks) + 1;
+  this.dataset.clicks = clicks;
+  if (clicks >= 5) {
+    this.classList.add('hand-drawn');
+    this.textContent = '';
+    this.title = '爸爸画给女儿的笑脸 ☺';
+  }
+});
+
+// Emoji panel
+document.getElementById('emoji-toggle').onclick = (e) => {
+  e.stopPropagation();
+  document.getElementById('emoji-panel').classList.toggle('show');
+};
+document.querySelectorAll('.emoji-panel span').forEach(span => {
+  span.onclick = () => {
+    const ta = document.getElementById('reply-text');
+    ta.value += span.textContent;
+    ta.focus();
+  };
+});
+document.addEventListener('click', () => {
+  document.getElementById('emoji-panel').classList.remove('show');
+});
+
+// Submit reply
+function submitReply() {
+  const ta = document.getElementById('reply-text');
+  const text = ta.value.trim();
+  if (!text) return;
+
+  // Check for hidden triggers
+  if (text.includes('0.003') || text.includes('偏移')) {
+    document.getElementById('hidden-link').classList.add('show');
+  }
+
+  // Add reply to page
+  const container = document.getElementById('thread-container');
+  const floorCount = container.querySelectorAll('.post-row').length;
+  const reply = document.createElement('div');
+  reply.className = 'post-row reply-post';
+  reply.innerHTML = `
+    <div class="post-sidebar">
+      <div class="avatar" style="background:var(--accent);">夏</div>
+      <div class="username">小夏夏晚</div>
+      <div class="user-title">新手上路</div>
+    </div>
+    <div class="post-main">
+      <div class="post-meta-row">
+        <span>回复于：刚刚</span>
+        <span class="post-floor">${floorCount}楼</span>
+      </div>
+      <div class="post-body font-medium">
+        <p>${text}</p>
+      </div>
+    </div>`;
+  const replyArea = container.querySelector('.reply-area');
+  container.insertBefore(reply, replyArea);
+  ta.value = '';
+  reply.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Font size
+function changeFontSize(size) {
+  document.querySelectorAll('.post-body').forEach(body => {
+    body.classList.remove('font-small','font-medium','font-large');
+    body.classList.add('font-' + size);
+  });
+  document.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// Only see OP
+let onlyOP = false;
+function toggleOnlyOP() {
+  onlyOP = !onlyOP;
+  document.querySelectorAll('.reply-post').forEach(p => {
+    p.style.display = onlyOP ? 'none' : '';
+  });
+  document.getElementById('only-op-btn').style.background = onlyOP ? 'var(--accent)' : '';
+  document.getElementById('only-op-btn').style.color = onlyOP ? '#fff' : '';
+}
+
+// Quote
+function quoteText() {
+  const ta = document.getElementById('reply-text');
+  ta.value += '> 引用：\n';
+  ta.focus();
+}
+
+// User card
+function showUserCard(e, username) {
+  e.stopPropagation();
+  const card = document.getElementById('user-card-popup');
+  const content = document.getElementById('user-card-content');
+  const info = {
+    'memory_00': { name:'memory_00', title:'论坛元老', posts:47, joined:'2008-03-15', last:'永远在线', note:'他的签名是"信号满格"' },
+    '小夏夏晚': { name:'小夏夏晚', title:'新手上路', posts:1, joined:'2026-08-23', last:'刚刚', note:'楼主的女儿' },
+    '匿名人士': { name:'匿名人士', title:'匿名', posts:'?', joined:'未知', last:'未知', note:'身份不明' }
+  };
+  const u = info[username] || { name:username, title:'注册会员', posts:'-', joined:'-', last:'-', note:'' };
+  content.innerHTML = `
+    <div style="font-weight:bold;font-size:14px;margin-bottom:4px;">${u.name}</div>
+    <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">${u.title}</div>
+    <div style="font-size:11px;line-height:1.8;">
+      帖子数: ${u.posts}<br>
+      注册: ${u.joined}<br>
+      最后在线: ${u.last}<br>
+      ${u.note ? '<div style="color:var(--accent);margin-top:6px;">'+u.note+'</div>' : ''}
+    </div>`;
+  card.style.left = (e.clientX + 10) + 'px';
+  card.style.top = (e.clientY + 10) + 'px';
+  card.classList.add('show');
+}
+document.addEventListener('click', () => {
+  document.getElementById('user-card-popup').classList.remove('show');
+});
+
+// Context menu
+document.getElementById('thread-container').addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  const menu = document.getElementById('context-menu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  menu.classList.add('show');
+});
+document.addEventListener('click', () => {
+  document.getElementById('context-menu').classList.remove('show');
+});
+
+// Copy
+function copyText() {
+  const selection = window.getSelection().toString();
+  if (selection) {
+    navigator.clipboard.writeText(selection).catch(()=>{});
+  }
+}
+
+// Fake pagination
+function fakePage(n) {
+  alert('第' + n + '页正在建设中……不过真正的线索在第一页。');
+  return false;
+}
+
+// Back to top
+window.addEventListener('scroll', () => {
+  document.getElementById('back-to-top').style.opacity = window.scrollY > 300 ? '1' : '0';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高嘚地图 - 搜索 39.903, 116.4</title>
+<link rel="stylesheet" href="assets/css/map.css">
+</head>
+<body data-page="map">
+
+<div class="map-topbar">
+  <div class="map-logo">高嘚<span class="de">地图</span></div>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="map-search" placeholder="搜索地点、坐标、公交..." value="39.903, 116.4">
+    <button style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;border:none;padding:6px 16px;border-radius:16px;cursor:pointer;font-size:12px;" onclick="doSearch()">搜索</button>
+    <div class="search-suggestions" id="search-suggestions">
+      <div class="item" onclick="quickSearch('39.903, 116.4')">📍 39.903, 116.4 · 信号源</div>
+      <div class="item" onclick="quickSearch('小夏小学')">🏫 小夏小学</div>
+      <div class="item" onclick="quickSearch('老夏修手机的铺子')">🔧 老夏修手机的铺子</div>
+      <div class="search-history">
+        <strong>搜索历史</strong>
+        <span class="clear-history" onclick="clearHistory(event)">清空</span>
+        <div id="history-tags"></div>
+      </div>
+    </div>
+  </div>
+  <div class="map-actions">
+    <div class="mode-toolbar" id="mode-toolbar">
+      <button class="mode-btn active" data-mode="drag" onclick="setMode('drag')" title="拖动地图">
+        <span class="mode-icon">✋</span>
+        <span class="mode-label">拖动</span>
+      </button>
+      <button class="mode-btn" data-mode="measure" onclick="setMode('measure')" title="测量距离">
+        <span class="mode-icon">📏</span>
+        <span class="mode-label">测量</span>
+      </button>
+      <button class="mode-btn" data-mode="mark" onclick="setMode('mark')" title="添加标记">
+        <span class="mode-icon">📍</span>
+        <span class="mode-label">标记</span>
+      </button>
+      <button class="mode-btn danger" data-mode="delete" onclick="setMode('delete')" title="删除标记">
+        <span class="mode-icon">🗑️</span>
+        <span class="mode-label">删除</span>
+      </button>
+      <div class="mode-divider"></div>
+      <button onclick="toggleSatellite()" id="sat-btn" title="卫星视图">🛰️</button>
+      <button onclick="toggleFullscreen()" id="fs-btn" title="全屏">⛶</button>
+      <a href="phone.html" class="back-link">📱</a>
+    </div>
+    <div class="mode-status" id="mode-status">
+      <span class="mode-status-dot"></span>
+      <span id="mode-status-text">拖动模式 — 按住地图移动</span>
+    </div>
+  </div>
+</div>
+
+<div class="map-area" id="map-area">
+  <div class="map-canvas" id="map-canvas">
+    <div class="map-layer">
+      <!-- Roads and features drawn with CSS -->
+      <div class="map-roads">
+        <!-- Highway -->
+        <div class="road highway" style="left:500px;top:0;width:18px;height:4000px;transform:rotate(-15deg);transform-origin:top;"></div>
+        <div class="road highway" style="left:0;top:1200px;width:4000px;height:14px;"></div>
+        <!-- Streets -->
+        <div class="road street" style="left:800px;top:0;width:8px;height:4000px;"></div>
+        <div class="road street" style="left:1500px;top:0;width:6px;height:4000px;"></div>
+        <div class="road street" style="left:0;top:800px;width:4000px;height:8px;"></div>
+        <div class="road street" style="left:0;top:1600px;width:4000px;height:6px;"></div>
+        <div class="road street" style="left:0;top:2200px;width:4000px;height:8px;transform:rotate(2deg);"></div>
+        <div class="road street" style="left:2000px;top:0;width:6px;height:4000px;transform:rotate(3deg);"></div>
+        <!-- Lanes -->
+        <div class="road lane" style="left:1100px;top:0;width:4px;height:4000px;"></div>
+        <div class="road lane" style="left:1800px;top:0;width:4px;height:4000px;"></div>
+        <div class="road lane" style="left:0;top:1000px;width:4000px;height:3px;"></div>
+        <div class="road lane" style="left:0;top:1900px;width:4000px;height:3px;"></div>
+        <!-- Diagonal roads -->
+        <div class="road street" style="left:0;top:0;width:6px;height:5000px;transform:rotate(25deg);transform-origin:top left;"></div>
+        <div class="road lane" style="left:3000px;top:0;width:4px;height:4000px;transform:rotate(-10deg);transform-origin:top;"></div>
+      </div>
+
+      <!-- Water -->
+      <div class="water" style="left:2200px;top:600px;width:400px;height:250px;"></div>
+      <div class="water" style="left:100px;top:2400px;width:300px;height:180px;"></div>
+
+      <!-- Green areas -->
+      <div class="green-area" style="left:1400px;top:1400px;width:200px;height:150px;"></div>
+      <div class="green-area" style="left:600px;top:1800px;width:150px;height:120px;"></div>
+      <div class="green-area" style="left:2500px;top:2000px;width:180px;height:200px;"></div>
+
+      <!-- Buildings -->
+      <div class="building" style="left:900px;top:900px;width:60px;height:40px;"></div>
+      <div class="building" style="left:1000px;top:950px;width:50px;height:50px;"></div>
+      <div class="building" style="left:1100px;top:880px;width:70px;height:55px;"></div>
+      <div class="building" style="left:1600px;top:1100px;width:80px;height:60px;"></div>
+      <div class="building" style="left:1750px;top:1050px;width:55px;height:70px;"></div>
+      <div class="building" style="left:500px;top:1300px;width:90px;height:45px;"></div>
+      <div class="building" style="left:2000px;top:1500px;width:65px;height:80px;"></div>
+      <div class="building" style="left:2100px;top:1450px;width:50px;height:50px;"></div>
+      <div class="building" style="left:700px;top:2000px;width:75px;height:55px;"></div>
+      <div class="building" style="left:2800px;top:900px;width:100px;height:70px;"></div>
+    </div>
+
+    <!-- Satellite layer -->
+    <div class="satellite-layer"></div>
+
+    <!-- Main marker: signal source -->
+    <div class="map-marker main dropping" id="main-marker" style="left:2000px;top:1200px;" onclick="showMainInfo(event)">
+      <div class="marker-pin" data-icon="📡"></div>
+      <div class="marker-label">信号源 · 废弃基站</div>
+    </div>
+
+    <!-- POI markers -->
+    <div class="map-marker" style="left:1600px;top:1500px;" onclick="showPOI(event,'school')">
+      <div class="marker-pin" data-icon="🏫" style="--accent:#5a8ad4;"></div>
+      <div class="marker-label">小夏小学</div>
+    </div>
+    <div class="map-marker" style="left:2400px;top:1000px;" onclick="showPOI(event,'shop')">
+      <div class="marker-pin" data-icon="🔧" style="--accent:#e8a040;"></div>
+      <div class="marker-label">老夏修手机的铺子</div>
+    </div>
+    <div class="map-marker" style="left:1200px;top:2000px;" onclick="showPOI(event,'stand')">
+      <div class="marker-pin" data-icon="📰" style="--accent:#8a6ad4;"></div>
+      <div class="marker-label">报刊亭</div>
+    </div>
+
+    <!-- Signal coverage -->
+    <div class="signal-coverage" id="signal-coverage" style="left:2000px;top:1200px;"></div>
+  </div>
+
+  <!-- Info window -->
+  <div class="info-window" id="info-window" style="left:2000px;top:1200px;">
+    <span class="iw-close" onclick="closeInfo()">×</span>
+    <div class="iw-header" id="iw-header">
+      <h3 id="iw-title"></h3>
+      <div class="iw-sub" id="iw-sub"></div>
+    </div>
+    <div class="iw-body" id="iw-body"></div>
+    <div class="iw-action" id="iw-action"></div>
+  </div>
+
+  <!-- Measure info -->
+  <div class="measure-info" id="measure-info">
+    📏 点击地图选择起点和终点
+  </div>
+</div>
+
+<!-- Map controls -->
+<div class="map-controls">
+  <button class="ctrl-btn" onclick="zoomIn()">+</button>
+  <button class="ctrl-btn" onclick="zoomOut()">−</button>
+  <div class="zoom-level" id="zoom-level">14</div>
+</div>
+
+<!-- Scale bar -->
+<div class="scale-bar">
+  <div class="bar" id="scale-bar" style="width:50px;"></div>
+  <span id="scale-text">200m</span>
+</div>
+
+<!-- Coordinate display -->
+<div class="coord-display" id="coord-display">39.903°N, 116.400°E</div>
+
+<!-- Mini map -->
+<div class="mini-map" id="mini-map">
+  <div class="viewport" id="mini-viewport" style="left:40px;top:30px;width:60px;height:40px;"></div>
+  <div class="mini-marker" style="left:70px;top:50px;"></div>
+  <div class="mini-marker" style="left:55px;top:65px;background:#5a8ad4;"></div>
+</div>
+
+<!-- Context menu -->
+<div class="context-menu" id="context-menu">
+  <div class="menu-item" onclick="contextAction('street')">🏠 查看街景</div>
+  <div class="menu-item" onclick="contextAction('coverage')">📡 查看信号覆盖范围</div>
+  <div class="divider"></div>
+  <div class="menu-item" onclick="contextAction('start')">🚩 设为起点</div>
+  <div class="menu-item" onclick="contextAction('end')">🏁 设为终点</div>
+</div>
+
+<!-- Street view modal -->
+<div class="street-modal" id="street-modal">
+  <span class="street-close" onclick="closeStreet()">&times;</span>
+  <div class="street-view" id="street-view">
+    <div class="corridor"></div>
+    <div class="door">
+      <div class="sign">
+        肿瘤科<br>3号病房
+        <small>—— 2014年春 ——</small>
+      </div>
+    </div>
+    <div class="floor"></div>
+  </div>
+  <div class="street-nav">
+    <button onclick="streetNav(-1)">◀ 后退</button>
+    <button onclick="closeStreet()">退出街景</button>
+    <button onclick="streetNav(1)">前进 ▶</button>
+  </div>
+  <div class="street-caption" id="street-caption">走廊尽头，3号病房。爸爸最后住的地方。</div>
+</div>
+
+<script src="assets/js/common.js"></script>
+<script>
+// ========== Map State ==========
+let scale = 1;
+let offsetX = 0, offsetY = 0;
+let isDragging = false;
+let startX, startY;
+let currentMode = 'drag'; // drag, measure, mark, delete
+let measurePoints = [];
+let contextX = 2000, contextY = 1200;
+let userMarkers = []; // 自定义标记列表
+
+const canvas = document.getElementById('map-canvas');
+const mapArea = document.getElementById('map-area');
+
+function applyTransform() {
+  canvas.style.transform = `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px)) scale(${scale})`;
+  document.getElementById('zoom-level').textContent = Math.round(12 + Math.log2(scale));
+  const scaleWidth = Math.round(50 / scale);
+  document.getElementById('scale-bar').style.width = scaleWidth + 'px';
+  const meters = Math.round(200 / scale);
+  document.getElementById('scale-text').textContent = meters >= 1000 ? (meters/1000)+'km' : meters+'m';
+}
+
+// Drag to pan
+mapArea.addEventListener('mousedown', (e) => {
+  if (e.button !== 0) return;
+  if (currentMode !== 'drag') return; // 只有拖动模式才能拖拽
+  isDragging = true;
+  startX = e.clientX - offsetX;
+  startY = e.clientY - offsetY;
+  mapArea.style.cursor = 'grabbing';
+});
+document.addEventListener('mousemove', (e) => {
+  const rect = mapArea.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const lat = (39.95 - (my / rect.height) * 0.1).toFixed(3);
+  const lng = (116.35 + (mx / rect.width) * 0.1).toFixed(3);
+  document.getElementById('coord-display').textContent = `${lat}°N, ${lng}°E`;
+
+  if (!isDragging || currentMode !== 'drag') return;
+  offsetX = e.clientX - startX;
+  offsetY = e.clientY - startY;
+  applyTransform();
+});
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  if (currentMode === 'drag') mapArea.style.cursor = 'grab';
+});
+
+// ========== 模式切换 ==========
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  const statusText = {
+    drag: '拖动模式 — 按住地图移动',
+    measure: '测量模式 — 点击地图选择起点和终点',
+    mark: '标记模式 — 点击地图添加标记',
+    delete: '删除模式 — 点击标记删除（右键取消）'
+  };
+  const statusEl = document.getElementById('mode-status-text');
+  statusEl.textContent = statusText[mode];
+  document.getElementById('mode-status').className = 'mode-status ' + mode;
+
+  const cursors = { drag: 'grab', measure: 'crosshair', mark: 'copy', delete: 'not-allowed' };
+  mapArea.style.cursor = cursors[mode];
+
+  // 退出测量时清除测量线
+  if (mode !== 'measure') {
+    clearMeasure();
+    document.getElementById('measure-info').classList.remove('show');
+  } else {
+    document.getElementById('measure-info').classList.add('show');
+    measurePoints = [];
+  }
+
+  // 标记hover效果
+  document.querySelectorAll('.map-marker').forEach(m => {
+    m.classList.toggle('deletable', mode === 'delete');
+  });
+}
+
+// 右键退出删除模式
+mapArea.addEventListener('contextmenu', (e) => {
+  if (currentMode === 'delete' || currentMode === 'mark' || currentMode === 'measure') {
+    e.preventDefault();
+    setMode('drag');
+    return;
+  }
+});
+
+// Zoom
+mapArea.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? 0.9 : 1.1;
+  scale = Math.max(0.5, Math.min(3, scale * delta));
+  applyTransform();
+}, { passive: false });
+
+function zoomIn() { scale = Math.min(3, scale * 1.2); applyTransform(); }
+function zoomOut() { scale = Math.max(0.5, scale / 1.2); applyTransform(); }
+
+// Right click
+mapArea.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  const rect = mapArea.getBoundingClientRect();
+  contextX = (e.clientX - rect.left - rect.width/2 - offsetX) / scale + 2000;
+  contextY = (e.clientY - rect.top - rect.height/2 - offsetY) / scale + 2000;
+  const menu = document.getElementById('context-menu');
+  menu.style.left = e.clientX + 'px';
+  menu.style.top = e.clientY + 'px';
+  menu.classList.add('show');
+});
+document.addEventListener('click', () => {
+  document.getElementById('context-menu').classList.remove('show');
+  document.getElementById('search-suggestions').classList.remove('show');
+});
+
+function contextAction(action) {
+  document.getElementById('context-menu').classList.remove('show');
+  if (action === 'street') {
+    openStreet();
+  } else if (action === 'coverage') {
+    showCoverage();
+  } else if (action === 'start') {
+    placeTempMarker(contextX, contextY, '起点');
+  } else if (action === 'end') {
+    placeTempMarker(contextX, contextY, '终点');
+  }
+}
+
+// Click — 根据当前模式执行不同操作
+mapArea.addEventListener('click', (e) => {
+  // 忽略UI元素点击
+  if (e.target.closest('.map-marker') || e.target.closest('.info-window') ||
+      e.target.closest('.map-controls') || e.target.closest('.mode-toolbar') ||
+      e.target.closest('.map-topbar') || e.target.closest('.context-menu')) return;
+
+  const rect = mapArea.getBoundingClientRect();
+  const x = (e.clientX - rect.left - rect.width/2 - offsetX) / scale + 2000;
+  const y = (e.clientY - rect.top - rect.height/2 - offsetY) / scale + 2000;
+
+  if (currentMode === 'measure') {
+    addMeasurePoint(x, y, e.clientX, e.clientY);
+  } else if (currentMode === 'mark') {
+    addUserMarker(x, y);
+  }
+  // drag 模式不做事，delete 模式靠点击标记触发
+});
+
+// 标记点击 — 删除模式下删除，其他模式弹信息
+document.addEventListener('click', (e) => {
+  const marker = e.target.closest('.map-marker');
+  if (marker && currentMode === 'delete') {
+    e.stopPropagation();
+    // 不允许删除主要标记
+    if (marker.id === 'main-marker') {
+      showMapToast('⚠️ 信号源标记不可删除');
+      return;
+    }
+    marker.style.transform = 'scale(0)';
+    marker.style.opacity = '0';
+    setTimeout(() => marker.remove(), 300);
+    showMapToast('🗑️ 标记已删除');
+    return;
+  }
+});
+
+function addUserMarker(x, y) {
+  const names = ['我的标记', '检查点', '可疑位置', '待确认', '线索点'];
+  const name = names[Math.floor(Math.random() * names.length)];
+  const marker = document.createElement('div');
+  marker.className = 'map-marker dropping user-marker';
+  marker.style.left = x + 'px';
+  marker.style.top = y + 'px';
+  marker.innerHTML = `<div class="marker-pin" data-icon="📍" style="--accent:#4a9eff;"></div><div class="marker-label">${name}</div>`;
+  marker.onclick = function(e) {
+    e.stopPropagation();
+    if (currentMode === 'delete') return;
+    const iw = document.getElementById('info-window');
+    document.getElementById('iw-title').textContent = '📍 ' + name;
+    document.getElementById('iw-sub').textContent = '自定义标记';
+    document.getElementById('iw-body').innerHTML = `
+      <div class="row"><span class="label">坐标：</span><span>${x.toFixed(1)}, ${y.toFixed(1)}</span></div>
+      <div class="row" style="margin-top:6px;color:var(--text-dim);font-size:12px;">切换到删除模式可移除此标记</div>
+    `;
+    document.getElementById('iw-action').textContent = '';
+    iw.style.left = x + 'px';
+    iw.style.top = y + 'px';
+    iw.classList.add('show');
+  };
+  document.querySelector('.map-canvas').appendChild(marker);
+  setTimeout(() => marker.classList.remove('dropping'), 700);
+  userMarkers.push({ x, y, name });
+  showMapToast('📍 已添加标记：' + name);
+}
+
+function showMapToast(msg) {
+  let toast = document.getElementById('map-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'map-toast';
+    toast.className = 'map-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function placeTempMarker(x, y, label) {
+  const marker = document.createElement('div');
+  marker.className = 'map-marker dropping';
+  marker.style.left = x + 'px';
+  marker.style.top = y + 'px';
+  marker.innerHTML = `<div class="marker-pin" data-icon="📍"></div><div class="marker-label">${label}</div>`;
+  document.querySelector('.map-canvas').appendChild(marker);
+  setTimeout(() => marker.classList.remove('dropping'), 700);
+}
+
+// Info windows
+function showMainInfo(e) {
+  e.stopPropagation();
+  const iw = document.getElementById('info-window');
+  document.getElementById('iw-title').textContent = '📍 信号源 · 废弃基站';
+  document.getElementById('iw-sub').textContent = '1998年建成 · 2006年拆除';
+  document.getElementById('iw-body').innerHTML = `
+    <div class="row"><span class="label">建设者：</span><span>夏建国（工号0003）</span></div>
+    <div class="row"><span class="label">坐标：</span><span>39.903°N, 116.400°E</span></div>
+    <div class="row"><span class="label">备注：</span><span>第一个信号从这里发出</span></div>
+    <div class="row" style="margin-top:8px;color:var(--accent);font-style:italic;">"爸爸在这里装了一个信号塔，不管你在哪里，爸爸的信号都能找到你。"</div>
+  `;
+  document.getElementById('iw-action').textContent = '🏠 查看街景';
+  document.getElementById('iw-action').onclick = openStreet;
+  iw.style.left = '2000px';
+  iw.style.top = '1200px';
+  iw.classList.add('show');
+}
+
+function showPOI(e, type) {
+  e.stopPropagation();
+  const iw = document.getElementById('info-window');
+  const data = {
+    school: { title:'🏫 小夏小学', sub:'2007-2013', body:'爸爸每天接我放学的路。<br>他总在校门口等我，手里拿着一瓶热牛奶。', icon:'🏫' },
+    shop: { title:'🔧 老夏修手机的铺子', sub:'2005-2012', body:'他总说自己什么都会修。<br>放学了我就坐在铺子里写作业，看他拆手机。', icon:'🔧' },
+    stand: { title:'📰 报刊亭', sub:'每个周日早上', body:'每个周日早上他都在这买报纸。<br>买完报纸会给我带一根冰棍。', icon:'📰' }
+  };
+  const d = data[type];
+  const rect = e.currentTarget.getBoundingClientRect();
+  const mapRect = mapArea.getBoundingClientRect();
+  const x = parseFloat(e.currentTarget.style.left);
+  const y = parseFloat(e.currentTarget.style.top);
+  document.getElementById('iw-title').textContent = d.title;
+  document.getElementById('iw-sub').textContent = d.sub;
+  document.getElementById('iw-body').innerHTML = d.body;
+  document.getElementById('iw-action').textContent = '';
+  iw.style.left = x + 'px';
+  iw.style.top = y + 'px';
+  iw.classList.add('show');
+}
+
+function closeInfo() {
+  document.getElementById('info-window').classList.remove('show');
+}
+
+// Search
+function doSearch() {
+  const query = document.getElementById('map-search').value.trim();
+  if (!query) return;
+  saveHistory(query);
+
+  if (query.includes('39.903') || query.includes('信号')) {
+    // Animate to main marker
+    offsetX = 0; offsetY = 0; scale = 1.5;
+    applyTransform();
+    const marker = document.getElementById('main-marker');
+    marker.classList.remove('dropping');
+    void marker.offsetWidth;
+    marker.classList.add('dropping');
+    setTimeout(() => showMainInfo({stopPropagation:()=>{}}), 700);
+  } else {
+    alert('已搜索：' + query + '\n\n提示：试试搜索 "39.903, 116.4" 找到信号源。');
+  }
+}
+
+function quickSearch(q) {
+  document.getElementById('map-search').value = q;
+  document.getElementById('search-suggestions').classList.remove('show');
+  doSearch();
+}
+
+document.getElementById('map-search').addEventListener('focus', () => {
+  document.getElementById('search-suggestions').classList.add('show');
+});
+
+// Search history
+function saveHistory(q) {
+  let history = ARG.storage.get('map_history', []);
+  history = [q, ...history.filter(h => h !== q)].slice(0, 5);
+  ARG.storage.set('map_history', history);
+  renderHistory();
+}
+function renderHistory() {
+  const history = ARG.storage.get('map_history', []);
+  document.getElementById('history-tags').innerHTML = history.map(h =>
+    `<span class="history-tag" onclick="quickSearch('${h}')">${h}</span>`
+  ).join('');
+}
+function clearHistory(e) {
+  e.stopPropagation();
+  ARG.storage.set('map_history', []);
+  renderHistory();
+}
+renderHistory();
+
+// Signal coverage
+function showCoverage() {
+  const cov = document.getElementById('signal-coverage');
+  const radius = 600;
+  cov.style.width = radius * 2 + 'px';
+  cov.style.height = radius * 2 + 'px';
+  cov.classList.remove('show');
+  void cov.offsetWidth;
+  cov.classList.add('show');
+
+  // Add rings
+  for (let i = 0; i < 3; i++) {
+    const ring = document.createElement('div');
+    ring.className = 'signal-ring';
+    ring.style.left = '2000px';
+    ring.style.top = '1200px';
+    ring.style.width = radius * 2 + 'px';
+    ring.style.height = radius * 2 + 'px';
+    ring.style.animationDelay = (i * 1) + 's';
+    document.querySelector('.map-canvas').appendChild(ring);
+    setTimeout(() => ring.remove(), 4000);
+  }
+
+  // Show info
+  const iw = document.getElementById('info-window');
+  document.getElementById('iw-title').textContent = '📡 信号覆盖范围';
+  document.getElementById('iw-sub').textContent = '半径约3km · 永远满格';
+  document.getElementById('iw-body').innerHTML = `
+    覆盖区域包括：<br>
+    🏠 小夏的家（出生-6岁）<br>
+    🏫 小夏小学<br>
+    🏠 第二个家（7-12岁）<br>
+    🏥 医院（2014年）<br>
+    <span style="color:var(--accent);font-style:italic;">"不管你走到哪里，爸爸的信号永远覆盖你。"</span>
+  `;
+  document.getElementById('iw-action').textContent = '';
+  iw.style.left = '2000px';
+  iw.style.top = '1200px';
+  iw.classList.add('show');
+}
+
+// Satellite toggle
+function toggleSatellite() {
+  mapArea.classList.toggle('satellite');
+  document.getElementById('sat-btn').classList.toggle('active');
+}
+
+// Measure tool
+function toggleMeasure() {
+  measureMode = !measureMode;
+  measurePoints = [];
+  document.querySelectorAll('.measure-line,.measure-point').forEach(el => el.remove());
+  const btn = document.getElementById('measure-btn');
+  btn.classList.toggle('active');
+  document.getElementById('measure-info').classList.toggle('show');
+  if (measureMode) {
+    document.getElementById('measure-info').innerHTML = '📏 点击地图选择起点和终点';
+  }
+}
+
+function addMeasurePoint(x, y, cx, cy) {
+  const point = document.createElement('div');
+  point.className = 'measure-point';
+  point.style.left = x + 'px';
+  point.style.top = y + 'px';
+  document.querySelector('.map-canvas').appendChild(point);
+  measurePoints.push({x, y});
+
+  if (measurePoints.length === 2) {
+    const [p1, p2] = measurePoints;
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const realDist = Math.round(dist * 0.5);
+
+    const line = document.createElement('div');
+    line.className = 'measure-line';
+    line.style.left = p1.x + 'px';
+    line.style.top = p1.y + 'px';
+    line.style.width = dist + 'px';
+    line.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+    document.querySelector('.map-canvas').appendChild(line);
+
+    document.getElementById('measure-info').innerHTML = `📏 距离: ${realDist}米 · <button onclick="toggleMeasure()" style="background:var(--accent);color:#fff;border:none;padding:2px 10px;border-radius:4px;cursor:pointer;">关闭</button>`;
+    measurePoints = [];
+  }
+}
+
+// Fullscreen
+function toggleFullscreen() {
+  mapArea.classList.toggle('fullscreen');
+  document.getElementById('fs-btn').classList.toggle('active');
+}
+
+// Street view
+let streetStep = 0;
+const streetCaptions = [
+  '走廊尽头，3号病房。爸爸最后住的地方。',
+  '走廊的灯总是一闪一闪的，爸爸说那是信号在跳动。',
+  '他在这间病房里写完了最后一段代码。',
+  '"信号满格。"他说。那是他最后一句话。'
+];
+function openStreet() {
+  document.getElementById('street-modal').classList.add('show');
+  streetStep = 0;
+  document.getElementById('street-caption').textContent = streetCaptions[0];
+}
+function closeStreet() {
+  document.getElementById('street-modal').classList.remove('show');
+}
+function streetNav(dir) {
+  streetStep = Math.max(0, Math.min(streetCaptions.length - 1, streetStep + dir));
+  document.getElementById('street-caption').textContent = streetCaptions[streetStep];
+  const corridor = document.querySelector('#street-view .corridor');
+  corridor.style.opacity = '0.5';
+  setTimeout(() => { corridor.style.opacity = '1'; corridor.style.transition = 'opacity .3s'; }, 100);
+}
+
+// Initial search on load
+setTimeout(doSearch, 1500);
+applyTransform();
+</script>
+</body>
+</html>

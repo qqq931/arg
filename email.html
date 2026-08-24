@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安全邮箱 - memory_00@oldmail.com</title>
+<link rel="stylesheet" href="assets/css/email.css">
+</head>
+<body data-page="email">
+
+<div class="email-topbar">
+  <button class="menu-btn">☰</button>
+  <div class="email-logo">
+    <span class="logo-blue">安</span><span class="logo-red">全</span><span class="logo-yellow">邮</span><span class="logo-green">箱</span>
+  </div>
+  <div class="top-search">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="email-search" placeholder="搜索邮件...">
+  </div>
+  <div class="top-actions">
+    <button title="刷新" onclick="refreshEmails()">🔄</button>
+    <button title="设置">⚙️</button>
+    <button title="帮助">❓</button>
+    <a href="index.html" style="font-size:12px;color:var(--text-dim);text-decoration:none;padding:8px;">返回博客</a>
+  </div>
+</div>
+
+<div class="email-body">
+  <!-- Folder sidebar -->
+  <div class="folder-sidebar">
+    <button class="compose-btn" onclick="openCompose()">
+      <span class="plus">✏️</span> 撰写
+    </button>
+    <ul class="folder-list" id="folder-list">
+      <li class="folder-item active" data-folder="inbox">
+        <span class="folder-icon">📥</span>
+        <span class="folder-name">收件箱</span>
+        <span class="unread-count" id="inbox-count">3</span>
+      </li>
+      <li class="folder-item" data-folder="starred">
+        <span class="folder-icon">⭐</span>
+        <span class="folder-name">星标邮件</span>
+      </li>
+      <li class="folder-item" data-folder="sent">
+        <span class="folder-icon">📤</span>
+        <span class="folder-name">已发送</span>
+      </li>
+      <li class="folder-item" data-folder="draft">
+        <span class="folder-icon">📝</span>
+        <span class="folder-name">草稿箱</span>
+        <span class="unread-count">1</span>
+      </li>
+      <li class="folder-item" data-folder="trash">
+        <span class="folder-icon">🗑️</span>
+        <span class="folder-name">垃圾箱</span>
+      </li>
+      <li class="folder-item" data-folder="spam">
+        <span class="folder-icon">🚫</span>
+        <span class="folder-name">垃圾邮件</span>
+      </li>
+    </ul>
+    <div class="storage-info">
+      <div>存储空间</div>
+      <div class="storage-bar"><div class="used"></div></div>
+      <div style="margin-top:4px;">2.3 GB / 10 GB 已使用</div>
+    </div>
+  </div>
+
+  <!-- Email list -->
+  <div class="email-list-panel">
+    <div class="list-header">
+      <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+      <select id="bulk-action">
+        <option>批量操作</option>
+        <option value="read">标记已读</option>
+        <option value="unread">标记未读</option>
+        <option value="star">加星标</option>
+        <option value="delete">删除</option>
+      </select>
+      <button onclick="applyBulkAction()" style="background:none;border:1px solid var(--border);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:11px;">应用</button>
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshEmails()">🔄</button>
+    </div>
+    <div class="email-list" id="email-list"></div>
+    <div class="list-pagination">
+      <button onclick="changePage(-1)">‹ 上一页</button>
+      <span id="page-info">1 / 1</span>
+      <button onclick="changePage(1)">下一页 ›</button>
+    </div>
+  </div>
+
+  <!-- Email content -->
+  <div class="email-content-panel" id="email-content-panel">
+    <div class="no-selection" id="no-selection">
+      <div class="big-icon">📧</div>
+      <div>选择一封邮件阅读</div>
+      <div style="font-size:12px;margin-top:8px;color:var(--text-dim);">密码提示：天芽、高嘚、威信的首字母</div>
+    </div>
+  </div>
+</div>
+
+<!-- Compose modal -->
+<div class="compose-modal" id="compose-modal">
+  <div class="compose-header">
+    <h3>新邮件</h3>
+    <div class="compose-actions">
+      <button onclick="closeCompose()">—</button>
+      <button onclick="closeCompose()">×</button>
+    </div>
+  </div>
+  <div class="compose-fields">
+    <div style="position:relative;">
+      <input type="text" id="compose-to" placeholder="收件人">
+      <div class="autocomplete-list" id="autocomplete-list"></div>
+    </div>
+    <input type="text" id="compose-subject" placeholder="主题">
+  </div>
+  <div class="compose-body">
+    <textarea id="compose-body" placeholder="写邮件..."></textarea>
+  </div>
+  <div class="compose-footer">
+    <button class="send-email-btn" onclick="sendEmail()">发送</button>
+    <div class="compose-tools">
+      <button>📎</button>
+      <button>😊</button>
+      <button>🖼️</button>
+    </div>
+  </div>
+</div>
+
+<button class="email-back-top" id="email-back-top" onclick="document.querySelector('.email-view').scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script src="assets/js/common.js"></script>
+<script>
+// ========== Email Data ==========
+const emails = {
+  inbox: [
+    {
+      id: 1, from: '系统管理员', email: 'admin@oldmail.com',
+      subject: '您的定时邮件已设置成功',
+      preview: '尊敬的memory_00用户，您设置的定时邮件将于2026年8月23日送达...',
+      date: '2014-01-15', time: '10:23', unread: false, starred: false, important: false,
+      body: `<p>尊敬的 memory_00 用户：</p>
+<p>您设置的定时邮件已成功提交。以下是您的定时邮件详情：</p>
+<ul>
+  <li>收件人：memory_00@oldmail.com（您自己）</li>
+  <li>定时发送时间：2026年8月23日 00:00</li>
+  <li>主题：给25岁的小夏</li>
+  <li>附件：encoded_audio.txt（base64编码）</li>
+</ul>
+<p>附件已加密处理，收件人需要手动解码。</p>
+<p>感谢您使用安全邮箱定时发送服务。</p>
+<p>—— 系统管理员</p>
+<div class="attachment-section">
+  <h4>附件 (1)</h4>
+  <div class="attachment-item" onclick="this.querySelector('.decode-attachment-btn').click()">
+    <span class="att-icon">📄</span> encoded_audio.txt
+    <span class="download-icon">⬇</span>
+  </div>
+  <button class="decode-attachment-btn" onclick="decodeAttachment()">解码附件</button>
+  <div class="decoded-content" id="decoded-attachment"></div>
+</div>`
+    },
+    {
+      id: 2, from: '夏建国', email: 'memory_00@oldmail.com',
+      subject: '给25岁的小夏',
+      preview: '小夏，当你读到这封信的时候，你已经25岁了。爸爸算了很久，2026年8月23日……',
+      date: '2026-08-23', time: '00:00', unread: true, starred: true, important: true,
+      body: `<div class="letter">
+<p class="greeting">小夏：</p>
+<p>当你读到这封信的时候，你已经25岁了。爸爸算了很久，2026年8月23日——这个数字在我心里转了两年。</p>
+<p>爸爸没什么本事，就会建基站、写代码。我在网上藏了一些东西，你小时候最喜欢玩寻宝游戏了，所以爸爸给你设计了一场跨越12年的寻宝。</p>
+<p>密码很简单，就是你常说的"天涯""高德""微信"的首字母。爸爸打错了字，你别笑——"德"字我写成了"嘚"，所以密码是 <strong>TYGDWX</strong>。</p>
+<p>你会在论坛找到我2012年发的帖子，在地图上找到那个基站坐标，在威信里看到我们最后说的话。最后，用密码打开那个加密存档。</p>
+<p>小夏，基站拆了，但信号还在。就像爸爸走了，但爱还在。</p>
+<p>爸爸不能陪你走以后的路了，但不管你走到哪里，爸爸的信号永远覆盖你。</p>
+<p class="closing">生日快乐，小夏。<br>——爸爸，2014年春</p>
+</div>
+<p style="margin-top:16px;">P.S. 点击"显示图片"，爸爸给你画了一张地图。</p>
+<button class="show-images-btn" onclick="showImages()">🖼️ 显示图片</button>
+<div class="hidden-images" id="hidden-images">
+  <div class="img-placeholder">
+    🗺️ 爸爸的手绘地图<br><br>
+    用铅笔在方格纸上画的，标注了：<br>
+    · 基站位置（画了一个铁塔）<br>
+    · 小夏的小学（画了一栋房子）<br>
+    · 家（画了一颗心）<br>
+    · 医院（画了一个十字）<br>
+    · 用虚线连接了所有地点，写着"信号覆盖范围"<br><br>
+    角落写着："小夏，不管你在哪，爸爸的信号都能找到你。"
+  </div>
+</div>`
+    },
+    {
+      id: 3, from: '老李', email: 'laoli@mail.com',
+      subject: '老夏，程序测试通过了',
+      preview: '延时发送程序我测了三遍，都没有问题。你放心，2026年8月23日准时送达...',
+      date: '2014-01-10', time: '15:42', unread: false, starred: false, important: false,
+      body: `<p>老夏：</p>
+<p>延时发送程序我测了三遍，都没有问题。最长延时设了12年，服务器时间校准过，不会差。</p>
+<p>论坛帖子的定时发布也设好了。base64那段我帮你验证过，解码正确——"小夏，爸爸学会用这个了"。你啊，学个新东西还挺得意。</p>
+<p>地图坐标我帮你核对了，39.903, 116.4，没错。POI信息也加上了。</p>
+<p>威信聊天记录备份好了。加密存档的密码按你说的设了。</p>
+<p>老夏，你放心。2026年8月23日，一切会准时送达。</p>
+<p>你好好休息。</p>
+<p>老李</p>`
+    },
+    {
+      id: 4, from: '小夏妈妈', email: 'mama@mail.com',
+      subject: '你少熬点夜',
+      preview: '又在写代码到半夜？医生说你要多休息。明天我炖了汤给你送过来...',
+      date: '2013-11-20', time: '22:15', unread: false, starred: false, important: false,
+      body: `<p>老夏：</p>
+<p>又在写代码到半夜？医生说你要多休息，别老对着电脑。</p>
+<p>明天我炖了汤给你送过来。小夏说想你了，周末我带她去看你。</p>
+<p>你那个"项目"也别太累了，身体要紧。</p>
+<p>——孩子妈</p>`
+    },
+    {
+      id: 5, from: '小夏', email: 'xiaoxia@mail.com',
+      subject: '爸爸你什么时候出院',
+      preview: '爸爸，我今天数学考了95分！你什么时候出院呀？我和妈妈都想你了...',
+      date: '2014-02-10', time: '16:22', unread: true, starred: true, important: false,
+      body: `<p>爸爸：</p>
+<p>我今天数学考了95分！你说过信号满格的！</p>
+<p>你什么时候出院呀？我和妈妈都想你了。妈妈说你还要住一段时间，但我觉得你很快就会好的。</p>
+<p>我学会了发邮件！是妈妈教我的。你看到了一定要回我哦。</p>
+<p>爸爸加油！信号满格！</p>
+<p>小夏</p>
+<p style="color:var(--text-dim);font-style:italic;margin-top:16px;">—— 这封邮件没有收到回复。</p>`
+    },
+    {
+      id: 8, from: '购物优惠', email: 'sale@spam.com',
+      subject: '🔥限时特惠！手机充值立减20元！',
+      preview: '亲爱的用户，您有一张20元话费优惠券待领取...',
+      date: '2026-08-22', time: '09:00', unread: false, starred: false, important: false,
+      body: '<p>限时特惠！充100减20！</p><p>点击领取优惠券...</p>'
+    },
+    {
+      id: 9, from: '招聘网站', email: 'jobs@spam.com',
+      subject: '通信工程师岗位推荐',
+      preview: '根据您的简历，我们为您推荐了以下通信工程师岗位...',
+      date: '2026-08-20', time: '14:30', unread: false, starred: false, important: false,
+      body: '<p>为您推荐了3个通信工程师相关岗位...</p>'
+    },
+    {
+      id: 10, from: '北京协和医院', email: 'noreply@pumch.cn',
+      subject: '体检报告通知',
+      preview: '尊敬的夏建国先生，您2013年度体检报告已生成，请查阅附件...',
+      date: '2013-12-05', time: '08:30', unread: false, starred: true, important: true,
+      tags: ['医疗'],
+      body: `<div class="email-doc">
+<div class="doc-header">
+  <div class="doc-logo">🏥</div>
+  <div class="doc-title">北京协和医院</div>
+  <div class="doc-sub">健康体检中心</div>
+</div>
+<p>尊敬的 <strong>夏建国</strong> 先生：</p>
+<p>您于2013年12月3日完成的年度体检报告已生成。请查阅附件了解详细结果。</p>
+<div class="doc-alert">
+  <strong>⚠️ 重要提示：</strong>本次体检发现部分指标异常，建议尽快复诊。
+  具体异常项包括：
+  <ul style="margin-top:8px;padding-left:20px;">
+    <li>肿瘤标志物 AFP：78.4 ng/mL（参考值 &lt; 20）</li>
+    <li>CT 影像：肝部见 3.2cm 低密度占位</li>
+    <li>建议：尽快至肿瘤科进一步检查</li>
+  </ul>
+</div>
+<p style="color:var(--text-dim);font-size:12px;margin-top:16px;">
+  这封邮件发送于2013年12月。小夏，爸爸看到这封邮件的时候，已经知道结果了。
+  但他没有告诉任何人。他只是开始写那些代码、设那些定时邮件、在笔记本上画那些坐标。
+  他在用剩下的时间，给你准备一份12年后的礼物。
+</p>
+</div>
+<div class="attachment-section">
+  <h4>附件 (1)</h4>
+  <div class="attachment-item" onclick="this.querySelector('button').click()">
+    <span class="att-icon">📄</span> 体检报告_夏建国_2013.pdf
+    <span class="download-icon">⬇</span>
+  </div>
+  <button class="decode-attachment-btn" onclick="showMedReport()">查看报告</button>
+  <div class="decoded-content" id="med-report"></div>
+</div>`
+    },
+    {
+      id: 11, from: '中国人寿保险', email: 'service@chinalife.com',
+      subject: '保单生效通知 - 教育年金保险',
+      preview: '尊敬的夏建国先生，您投保的"鑫享未来"教育年金保险已生效...',
+      date: '2013-06-15', time: '10:00', unread: false, starred: false, important: true,
+      tags: ['保险'],
+      body: `<div class="email-doc">
+<p>尊敬的夏建国先生：</p>
+<p>感谢您选择中国人寿保险。您投保的<strong>"鑫享未来"教育年金保险</strong>已正式生效。</p>
+<div class="doc-table">
+  <div class="doc-row"><span class="label">投保人：</span><span>夏建国</span></div>
+  <div class="doc-row"><span class="label">被保险人：</span><span>夏知夏（小夏）</span></div>
+  <div class="doc-row"><span class="label">保单号：</span><span>CL-2013-XJX-006847</span></div>
+  <div class="doc-row"><span class="label">生效日期：</span><span>2013年6月15日</span></div>
+  <div class="doc-row"><span class="label">年金领取：</span><span>被保险人25岁起，每年领取</span></div>
+  <div class="doc-row highlight"><span class="label">首笔金额：</span><span class="value">¥50,000</span></div>
+  <div class="doc-row"><span class="label">领取年限：</span><span>10年（至35岁）</span></div>
+  <div class="doc-row"><span class="label">备注：</span><span>生日贺礼，25岁生日快乐</span></div>
+</div>
+<p style="margin-top:16px;">如您有任何疑问，请拨打客服热线 95519。</p>
+<p style="color:var(--text-dim);font-size:12px;margin-top:16px;font-style:italic;">
+  小夏，这是爸爸在知道生病后做的第一件事。你25岁开始，每年都有一笔钱。
+  不多，但爸爸希望你知道——就算爸爸不在了，也在照顾你。
+</p>
+</div>`
+    },
+    {
+      id: 12, from: '老李', email: 'laoli@mail.com',
+      subject: '回复：东西都弄好了',
+      preview: '老夏，服务器我帮你架好了。定时邮件系统、论坛定时发帖、威信聊天备份...',
+      date: '2014-01-20', time: '23:15', unread: false, starred: false, important: true,
+      tags: ['线索'],
+      body: `<p>老夏：</p>
+<p>东西都弄好了，跟你说一声。</p>
+<p><strong>定时邮件系统：</strong>我在旧服务器上搭了一个延时发送脚本，最长支持15年。你设的2026年8月23日00:00，到时候会自动发。我测了五遍，没问题。</p>
+<p><strong>论坛帖子：</strong>那个帖子我已经定时发布了，2012年的时间戳已经做了处理，不会被管理员发现。base64编码那段我验证过了，解码正确。</p>
+<p><strong>威信聊天记录：</strong>我把你和小夏的聊天记录导出备份了。等威信旧版服务器还在的时候，我想办法让小夏能看到。你放心。</p>
+<p><strong>地图坐标：</strong>39.903, 116.4，POI信息我加上了。街景那个——你说要做医院走廊的场景？我尽量弄。你别太折腾了。</p>
+<p><strong>加密存档：</strong>密码按你说的设了，TYGDWX。你打错字那事儿太搞笑了，"嘚"哈哈哈。但我就按你写的设，不改。</p>
+<p>老夏，我认识你二十年了，没见过你对什么事这么上心。</p>
+<p>你放心。2026年8月23日，一切会准时送达。</p>
+<p>你好好休息。别老写代码了，医生说你要多睡觉。</p>
+<p style="margin-top:16px;color:var(--text-dim);">—— 老李</p>
+<p style="color:var(--text-dim);font-size:12px;margin-top:8px;">P.S. 小夏要是问起，我就说都是你自己弄的。功劳全是你的。</p>`
+    },
+    {
+      id: 13, from: '小夏妈妈', email: 'mama@mail.com',
+      subject: '今天收拾了你的书房',
+      preview: '你那个铁皮柜我没动，钥匙在你枕头底下。等小夏长大了让她自己开...',
+      date: '2014-02-25', time: '16:40', unread: true, starred: true, important: true,
+      tags: ['家人'],
+      body: `<p>老夏：</p>
+<p>今天收拾了你的书房。</p>
+<p>你桌上还摊着电路图，茶杯里的茶都干了。我没敢收，就那样放着。</p>
+<p>那个铁皮柜我没动，钥匙在你枕头底下——你藏得也太明显了，我一翻就找到了。</p>
+<p>等小夏长大了，让她自己开吧。你在里面放了什么，我不看。那是你们父女之间的事。</p>
+<p>小夏今天问我："妈妈，爸爸什么时候回家？"</p>
+<p>我说爸爸在建一个很远的信号塔，要很久很久才能回来。</p>
+<p>她"哦"了一声，就回房间写作业了。但我听见她在哭。</p>
+<p>老夏，你一定要好起来。</p>
+<p>小夏不能没有爸爸。</p>
+<p style="color:var(--text-dim);font-size:12px;margin-top:16px;font-style:italic;">
+  —— 这封邮件发出后三天，夏建国去世。小夏当时12岁。
+</p>`
+    },
+    {
+      id: 14, from: '基站监控系统', email: 'monitor@basestation.cn',
+      subject: '【告警】第一基站信号异常',
+      preview: '检测到基站 BTS-0003 信号强度异常波动，请检查设备...',
+      date: '2006-03-15', time: '03:27', unread: false, starred: false, important: false,
+      tags: ['系统'],
+      body: `<div class="email-doc" style="font-family:monospace;font-size:12px;">
+<p>>>> 基站监控系统 v2.1</p>
+<p>>>> 告警时间: 2006-03-15 03:27:14</p>
+<p>>>> 基站编号: BTS-0003 (第一基站)</p>
+<p>>>> 位置: 39.903°N, 116.400°E</p>
+<p>>>> 告警类型: 信号强度异常波动</p>
+<p>>>></p>
+<p>>>> DETAIL: 信号强度在过去24小时内出现3次异常峰值</p>
+<p>>>>       峰值时间: 00:03, 01:47, 03:27</p>
+<p>>>>       峰值频率: 与0003号工程师工牌RFID频率一致</p>
+<p>>>>       建议: 现场检查</p>
+<p>>>></p>
+<p>>>> STATUS: 已忽略</p>
+<p>>>> NOTES: 该基站已标记拆除，告警自动忽略</p>
+</div>
+<p style="color:var(--text-dim);font-size:12px;margin-top:16px;">
+  2006年3月15日凌晨3点27分——爸爸在基站拆除前最后一次去了那里。
+  他的工牌触发了监控告警。系统自动忽略了，因为基站已经标记拆除。
+  没有人知道他那天晚上去做了什么。
+  也许，他只是想再看一眼。
+</p>`
+    },
+    {
+      id: 15, from: '系统管理员', email: 'admin@oldmail.com',
+      subject: '邮箱将在30天后永久注销',
+      preview: '您的邮箱 memory_00@oldmail.com 已12年未登录，将于30天后永久注销...',
+      date: '2026-07-23', time: '00:00', unread: true, starred: false, important: true,
+      tags: ['系统'],
+      body: `<p>尊敬的 memory_00 用户：</p>
+<p>您的邮箱 <strong>memory_00@oldmail.com</strong> 已连续12年未登录。</p>
+<p>根据服务条款，长期未使用的邮箱将在通知后30天内永久注销，所有邮件数据将被清除且不可恢复。</p>
+<p>注销日期：<strong>2026年8月23日</strong></p>
+<p>如您希望保留邮箱，请在注销日前登录。</p>
+<p>—— 系统管理员</p>
+<p style="color:var(--accent);font-style:italic;margin-top:16px;">
+  2026年8月23日。正好是小夏25岁生日。定时邮件在邮箱注销前几个小时送达。
+  爸爸算好了一切。
+</p>`
+    }
+  ],
+  sent: [
+    {
+      id: 6, from: '我', email: 'memory_00@oldmail.com',
+      subject: '测试邮件',
+      preview: '这是一封测试邮件，用于验证定时发送功能是否正常...',
+      date: '2014-01-12', time: '09:15', unread: false, starred: false, important: false,
+      body: '<p>这是一封测试邮件，用于验证定时发送功能是否正常。</p><p>如果你在2014年收到这封邮件，说明即时发送正常。定时发送的测试由老李负责。</p><p>——memory_00</p>'
+    }
+  ],
+  draft: [
+    {
+      id: 7, from: '我', email: 'memory_00@oldmail.com',
+      subject: '还没想好标题',
+      preview: '小夏，爸爸今天手有点抖，写不动了。但有些话必须告诉你...',
+      date: '2014-02-28', time: '23:50', unread: false, starred: false, important: false,
+      body: `<p>小夏：</p>
+<p>爸爸今天手有点抖，写不动了。但有些话必须告诉你。</p>
+<p>爸爸藏的那些东西，你一定要找到。不是因为它们有多重要，而是因为爸爸想让你知道——</p>
+<p>（草稿在此中断，未完成）</p>`
+    }
+  ],
+  trash: [],
+  spam: [],
+  starred: []
+};
+
+// Populate starred
+emails.starred = emails.inbox.filter(e => e.starred);
+
+let currentFolder = 'inbox';
+let currentEmailId = null;
+let selectedEmails = new Set();
+
+// Render folder list
+function renderFolders() {
+  document.querySelectorAll('.folder-item').forEach(item => {
+    item.onclick = () => {
+      document.querySelectorAll('.folder-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      currentFolder = item.dataset.folder;
+      currentEmailId = null;
+      selectedEmails.clear();
+      renderEmailList();
+      document.getElementById('no-selection').style.display = 'flex';
+      document.getElementById('no-selection').nextElementSibling?.remove();
+    };
+  });
+}
+
+// Render email list
+function renderEmailList() {
+  const list = document.getElementById('email-list');
+  const folderEmails = emails[currentFolder] || [];
+  const unreadCount = folderEmails.filter(e => e.unread).length;
+  const countEl = document.getElementById('inbox-count');
+  if (currentFolder === 'inbox') countEl.textContent = unreadCount || '';
+  if (!countEl.textContent) countEl.style.display = 'none';
+
+  list.innerHTML = folderEmails.map(email => `
+    <div class="email-item ${email.unread ? 'unread' : ''} ${selectedEmails.has(email.id) ? 'selected' : ''}" data-id="${email.id}">
+      <input type="checkbox" class="checkbox" ${selectedEmails.has(email.id) ? 'checked' : ''} onchange="toggleSelect(${email.id}, event)">
+      <span class="star ${email.starred ? 'starred' : ''}" onclick="toggleStar(${email.id}, event)">${email.starred ? '★' : '☆'}</span>
+      <span class="important-tag ${email.important ? 'marked' : ''}" onclick="toggleImportant(${email.id}, event)">${email.important ? '🚩' : '⚐'}</span>
+      <div class="email-info" onclick="openEmail(${email.id})">
+        <div class="sender-row">
+          <span class="sender">${email.from}</span>
+          <span class="time">${email.date}</span>
+        </div>
+        <div class="subject">${email.subject}</div>
+        <div class="preview">${email.preview}</div>
+      </div>
+    </div>
+  `).join('');
+
+  if (folderEmails.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-dim);">此文件夹为空</div>';
+  }
+}
+
+// Open email
+function openEmail(id) {
+  const email = emails[currentFolder].find(e => e.id === id);
+  if (!email) return;
+  currentEmailId = id;
+  if (email.unread) {
+    email.unread = false;
+    renderEmailList();
+  }
+  const panel = document.getElementById('email-content-panel');
+  const avatarColors = ['#1a73e8','#d93025','#f9ab00','#1e8e3e','#8e24aa'];
+  const color = avatarColors[id % avatarColors.length];
+  panel.innerHTML = `
+    <div class="email-view">
+      <div class="email-detail-header">
+        <div class="detail-subject">${email.subject}</div>
+        <div class="detail-meta">
+          <div class="detail-avatar" style="background:${color}">${email.from[0]}</div>
+          <div class="detail-meta-info">
+            <div class="detail-sender">${email.from} <span class="sender-email">&lt;${email.email}&gt;</span></div>
+            <div class="detail-recipients">收件人: memory_00@oldmail.com</div>
+          </div>
+          <div class="detail-time">${email.date} ${email.time}</div>
+          <div class="detail-actions">
+            <button title="回复">↩️</button>
+            <button title="转发">↪️</button>
+            <button title="删除" onclick="deleteEmail(${id})">🗑️</button>
+          </div>
+        </div>
+      </div>
+      <div class="email-body">${email.body}</div>
+    </div>`;
+  panel.querySelector('.email-view').addEventListener('scroll', (e) => {
+    document.getElementById('email-back-top').classList.toggle('show', e.target.scrollTop > 200);
+  });
+}
+
+// Toggle star
+function toggleStar(id, e) {
+  e.stopPropagation();
+  const email = emails[currentFolder].find(em => em.id === id);
+  if (email) {
+    email.starred = !email.starred;
+    emails.starred = emails.inbox.filter(em => em.starred);
+    renderEmailList();
+  }
+}
+
+// Toggle important
+function toggleImportant(id, e) {
+  e.stopPropagation();
+  const email = emails[currentFolder].find(em => em.id === id);
+  if (email) {
+    email.important = !email.important;
+    renderEmailList();
+  }
+}
+
+// Delete email
+function deleteEmail(id) {
+  const idx = emails[currentFolder].findIndex(e => e.id === id);
+  if (idx > -1) {
+    const [email] = emails[currentFolder].splice(idx, 1);
+    if (currentFolder !== 'trash') {
+      emails.trash.push(email);
+    }
+    renderEmailList();
+    document.getElementById('email-content-panel').innerHTML = `
+      <div class="no-selection"><div class="big-icon">📧</div><div>邮件已删除</div></div>`;
+  }
+}
+
+// Select emails
+function toggleSelect(id, e) {
+  e.stopPropagation();
+  if (selectedEmails.has(id)) selectedEmails.delete(id);
+  else selectedEmails.add(id);
+}
+function toggleSelectAll() {
+  const checked = document.getElementById('select-all').checked;
+  emails[currentFolder].forEach(e => {
+    if (checked) selectedEmails.add(e.id);
+    else selectedEmails.delete(e.id);
+  });
+  renderEmailList();
+}
+function applyBulkAction() {
+  const action = document.getElementById('bulk-action').value;
+  selectedEmails.forEach(id => {
+    const email = emails[currentFolder].find(e => e.id === id);
+    if (!email) return;
+    if (action === 'read') email.unread = false;
+    if (action === 'unread') email.unread = true;
+    if (action === 'star') email.starred = true;
+    if (action === 'delete') deleteEmail(id);
+  });
+  selectedEmails.clear();
+  document.getElementById('select-all').checked = false;
+  renderEmailList();
+}
+
+// Compose
+function openCompose() {
+  document.getElementById('compose-modal').classList.add('show');
+}
+function closeCompose() {
+  document.getElementById('compose-modal').classList.remove('show');
+}
+function sendEmail() {
+  const to = document.getElementById('compose-to').value;
+  const subject = document.getElementById('compose-subject').value;
+  const body = document.getElementById('compose-body').value;
+  if (!to) { alert('请填写收件人'); return; }
+  emails.sent.unshift({
+    id: Date.now(), from:'我', email:'memory_00@oldmail.com',
+    subject: subject || '(无主题)', preview: body.slice(0,50),
+    date: '2026-08-23', time: new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'}),
+    unread:false, starred:false, important:false, body:'<p>'+body+'</p>'
+  });
+  closeCompose();
+  alert('邮件已发送！');
+  document.getElementById('compose-to').value = '';
+  document.getElementById('compose-subject').value = '';
+  document.getElementById('compose-body').value = '';
+}
+
+// Autocomplete
+const contacts = ['小夏妈妈 <mama@mail.com>', '老李 <laoli@mail.com>', '小夏 <xiaoxia@mail.com>', '系统管理员 <admin@oldmail.com>'];
+document.getElementById('compose-to').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  const list = document.getElementById('autocomplete-list');
+  const matches = contacts.filter(c => c.toLowerCase().includes(q));
+  if (matches.length && q) {
+    list.innerHTML = matches.map(c =>
+      `<div class="ac-item" onclick="document.getElementById('compose-to').value='${c}';document.getElementById('autocomplete-list').classList.remove('show')">${c}</div>`
+    ).join('');
+    list.classList.add('show');
+  } else {
+    list.classList.remove('show');
+  }
+});
+
+// Decode attachment
+function decodeAttachment() {
+  const encoded = '5bCP5aSP77yM5aaC5p6c5b6T5Yiw5LiN6L+Q5LqG6K+05Y+R77yM5b6T55qE5aSE55CG5b+15L2g55qE';
+  try {
+    const decoded = decodeURIComponent(escape(atob(encoded)));
+    const result = document.getElementById('decoded-attachment');
+    result.innerHTML = `<strong>📼 录音文字转录：</strong><br><br>"${decoded}"<br><br><small style="color:var(--text-dim);">录音日期：2014年1月 · 时长：0:23</small>`;
+    result.classList.add('show');
+  } catch(e) {
+    document.getElementById('decoded-attachment').textContent = '解码失败';
+  }
+}
+
+// Show images
+function showImages() {
+  document.getElementById('hidden-images').classList.add('show');
+}
+
+// 查看体检报告
+function showMedReport() {
+  const el = document.getElementById('med-report');
+  el.innerHTML = `
+    <div class="medical-report">
+      <div class="mr-header">
+        <div class="mr-hospital">北京协和医院 · 体检报告</div>
+        <div class="mr-id">No. 20131203-0047</div>
+      </div>
+      <div class="mr-row"><span class="mr-label">姓名</span><span>夏建国</span></div>
+      <div class="mr-row"><span class="mr-label">性别 / 年龄</span><span>男 / 42</span></div>
+      <div class="mr-row"><span class="mr-label">体检日期</span><span>2013-12-03</span></div>
+      <div class="mr-section">异常指标</div>
+      <div class="mr-row abnormal"><span class="mr-label">AFP 甲胎蛋白</span><span>78.4 ng/mL ↑ <small>(参考 &lt;20)</small></span></div>
+      <div class="mr-row abnormal"><span class="mr-label">腹部CT</span><span>肝右叶见 3.2cm 低密度占位，边界不清</span></div>
+      <div class="mr-row abnormal"><span class="mr-label">诊断意见</span><span class="mr-warn">建议尽快至肿瘤科进一步检查</span></div>
+      <div class="mr-section">一般检查</div>
+      <div class="mr-row"><span class="mr-label">身高 / 体重</span><span>172cm / 58kg</span></div>
+      <div class="mr-row"><span class="mr-label">血压</span><span>135/85 mmHg</span></div>
+      <div class="mr-row"><span class="mr-label">心率</span><span>72 次/分</span></div>
+      <div class="mr-stamp">医师签字：王某某<br>2013-12-05</div>
+    </div>
+  `;
+  el.classList.add('show');
+}
+
+// Search
+document.getElementById('email-search').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  if (!q) { renderEmailList(); return; }
+  const list = document.getElementById('email-list');
+  const all = [...emails.inbox, ...emails.sent, ...emails.draft];
+  const results = all.filter(e =>
+    e.subject.toLowerCase().includes(q) ||
+    e.from.toLowerCase().includes(q) ||
+    e.preview.toLowerCase().includes(q)
+  );
+  list.innerHTML = results.map(email => `
+    <div class="email-item ${email.unread ? 'unread' : ''}" data-id="${email.id}">
+      <span class="star ${email.starred ? 'starred' : ''}">${email.starred ? '★' : '☆'}</span>
+      <div class="email-info" onclick="openEmail(${email.id})">
+        <div class="sender-row">
+          <span class="sender">${email.from}</span>
+          <span class="time">${email.date}</span>
+        </div>
+        <div class="subject">${email.subject}</div>
+        <div class="preview">${email.preview}</div>
+      </div>
+    </div>`).join('') || '<div style="text-align:center;padding:40px;color:var(--text-dim);">没有找到相关邮件</div>';
+});
+
+// Refresh
+function refreshEmails() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  setTimeout(() => {
+    btn.classList.remove('spinning');
+    renderEmailList();
+  }, 800);
+}
+
+// Pagination
+function changePage(dir) {
+  // Only 1 page visually
+}
+
+// Init
+renderFolders();
+renderEmailList();
+</script>
+</body>
+</html>

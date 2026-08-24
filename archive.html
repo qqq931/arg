@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>加密存档 - memory_00</title>
+<link rel="stylesheet" href="assets/css/archive.css">
+</head>
+<body data-page="archive">
+
+<div class="crt-overlay"></div>
+<div class="crt-flicker"></div>
+
+<div class="terminal-window" id="terminal-window">
+  <div class="term-titlebar" id="term-titlebar">
+    <div class="term-dots">
+      <span class="term-dot red"></span>
+      <span class="term-dot yellow"></span>
+      <span class="term-dot green"></span>
+    </div>
+    <div class="term-title">memory_00@archive:~ — 安全连接</div>
+    <div style="width:50px;"></div>
+  </div>
+  <div class="term-body" id="term-body">
+    <!-- Content injected by JS -->
+  </div>
+</div>
+
+<!-- Birthday overlay -->
+<div class="birthday-overlay" id="birthday-overlay">
+  <div class="cake">🎂</div>
+  <div class="wish">
+    生日快乐，小夏。<br>
+    25岁了。
+  </div>
+  <div class="sub-wish">爸爸的信号，永远满格。</div>
+  <button class="close-wish" onclick="document.getElementById('birthday-overlay').classList.remove('show')">继续</button>
+</div>
+
+<script src="assets/js/common.js"></script>
+<script>
+// ========== Archive Terminal ==========
+const termBody = document.getElementById('term-body');
+let currentUser = null;
+let commandHistory = [];
+let historyIndex = -1;
+let currentView = 'boot'; // boot, login, shell, file, final
+let viewedFiles = new Set();
+let loginAttempts = 0;
+let lockedOut = false;
+
+// Files
+const files = {
+  '01_第一封信.txt': {
+    size: '1.2KB',
+    content: `<span class="highlight">═══ 给小夏的第一封信 ═══</span>
+
+小夏：
+
+这是爸爸藏的第一个东西。你现在多大了？
+如果你在读这封信，说明你找到了入口。
+
+爸爸是在2012年冬天开始写这些的。
+那时候你刚上六年级，数学考了95分，
+高兴得在电话里喊了三遍"信号满格"。
+
+爸爸想，等你长大了，也许会忘记一些事情。
+所以爸爸把它们都写下来了。
+
+慢慢找，不着急。
+爸爸等了12年，不差这一会儿。
+
+——爸爸，2012年冬`
+  },
+  '02_基站建设日志.txt': {
+    size: '4.8KB',
+    content: `<span class="highlight">═══ 1998年基站建设工作日志 ═══</span>
+
+<span class="dim">3月15日 晴</span>
+今天到岗。工号0003，第三个。
+北京的风真大。塔架材料到了，明天开始组装。
+<span class="emotion">→ 小夏今天满月了。等基站建好了，第一个电话打回家。</span>
+
+<span class="dim">4月2日 多云</span>
+塔架立起来了。30米高，爬上去腿发软。
+老张在上面喊："老夏，这可是北京第一个！"
+<span class="emotion">→ 等小夏长大了，带她来看。告诉她爸爸建的。</span>
+
+<span class="dim">5月20日 晴</span>
+设备调试完成。第一个电话打通了。
+我打的是家里的电话。你妈接的，说"喂"的时候
+我手都在抖。信号满格。
+<span class="emotion">→ 小夏在电话里哭了。她才4个月大，什么都不懂。
+  但爸爸觉得，她是在为我欢呼。</span>
+
+<span class="dim">6月10日 晴</span>
+基站正式投入运行。站长请大家吃了饭。
+<span class="emotion">→ 小夏今天第一次叫"爸爸"。虽然是对着电话叫的。
+  信号真好。</span>
+
+<span class="dim">8月3日 雨</span>
+暴雨。基站出了故障，半夜去抢修。
+爬到塔顶的时候，雷声就在耳边。
+<span class="emotion">→ 小夏发烧了。你妈说39度。我在塔上干着急。
+  修完基站跑回家，她已经退烧了。
+  你妈说："你的信号把她的病也修好了。"</span>
+
+<span class="dim">2008年6月15日 晴</span>
+带小夏来基站了。基站还在，虽然旧了。
+她7岁了，扎着两个小辫子。
+我指给她看："爸爸在这里装了一个信号塔，
+不管你在哪里，爸爸的信号都能找到你。"
+她仰着头看了好久，说："爸爸，你好厉害。"
+<span class="emotion">→ 那是爸爸最骄傲的一天。</span>`
+  },
+  '03_信号覆盖分析.txt': {
+    size: '2.1KB',
+    content: `<span class="highlight">═══ 信号覆盖分析报告 ═══</span>
+
+<span class="dim">项目代号：满格</span>
+<span class="dim">工程师：夏建国（工号0003）</span>
+<span class="dim">日期：2013年</span>
+
+覆盖范围图示：
+
+         🏫 小夏的小学
+        /              \\
+   🏠 第一个家 ──── 📡 信号源(1998)
+        \\              /
+         🏠 第二个家
+              |
+         🏥 医院(2014)
+              |
+         🎓 小夏的大学(未来)
+
+<span class="emotion">技术参数：
+  - 覆盖半径：3公里（实际覆盖：小夏的一生）
+  - 信号强度：满格
+  - 持续时间：永远
+  - 备用电源：爱
+
+爸爸分析了很多遍。不管小夏搬到哪里，
+上什么学校，走多远的路——
+信号都能覆盖。
+
+这不是技术问题。
+这是爸爸的承诺。</span>`
+  },
+  '04_聊天记录备份.txt': {
+    size: '6.4KB',
+    content: `<span class="highlight">═══ 家庭群聊备份 ═══</span>
+<span class="dim">（2012年 - 2014年）</span>
+
+<span class="amber">[2012-09-01]</span>
+爸爸：小夏考试考了多少分？
+小夏：数学95！语文90！
+爸爸：信号满格！爸爸就知道你行！
+妈妈：就你会说，晚上给你们做红烧肉
+
+<span class="amber">[2013-05-20]</span>
+小夏：我当班长了！
+爸爸：信号满格！我闺女最棒！
+妈妈：真棒！周末带你去公园
+
+<span class="amber">[2013-10-15]</span>
+爸爸：今天医生说情况还可以
+妈妈：你好好休息，别老玩手机
+爸爸：没事，跟老李聊工作
+爸爸：<span class="emotion">（其实是在给小夏写东西）</span>
+
+<span class="amber">[2014-01-20]</span>
+爸爸：爸爸今天感觉好多了
+爸爸：别担心，信号还在
+妈妈：你好好休息
+爸爸：小夏放学了吗？
+妈妈：在路上了
+
+<span class="amber">[2014-02-10]</span>
+小夏：爸爸你什么时候出院？
+爸爸：快了。等爸爸出去了，带你去看基站。
+小夏：好！拉钩！
+爸爸：拉钩。信号满格。
+
+<span class="dim">—— 备份结束 ——</span>
+<span class="emotion">
+最后一条消息之后，爸爸再也没有回复过。
+但"信号满格"这四个字，
+是他留给这个世界的最后一句话。
+</span>`
+  },
+  '05_最后一封信.txt': {
+    size: '0.8KB',
+    content: `<span class="highlight">═══ 最后一封信 ═══</span>
+
+
+小夏：
+
+爸爸的信号到这里就满格了。
+
+以后的路，你要自己走。
+但不管你走到哪里，
+爸爸的信号永远覆盖你。
+
+你12岁那年生日，在医院里许的愿
+爸爸知道。
+爸爸没有做到。
+对不起。
+
+但爸爸想让你知道——
+爸爸每一天都在爱你。
+从1998年建第一个基站开始，
+到2014年春天，
+信号从未断过。
+
+以后也不会断。
+
+生日快乐。
+
+<span class="emotion">——爸爸，2014年春</span>
+
+<span class="dim" style="display:block;text-align:center;margin-top:2em;">
+📡 ▓▓▓▓▓ 信号强度：满格
+</span>`
+  }
+};
+
+// ========== Boot Sequence ==========
+function bootSequence() {
+  const lines = [
+    { text: 'Memory-00 Secure Archive System v2.1.4', cls: 'green', delay: 100 },
+    { text: 'Copyright (c) 2012-2026 Xia Jianguo. All rights reserved.', cls: 'dim', delay: 200 },
+    { text: '', cls: '', delay: 100 },
+    { text: '[BIOS] Memory Test: 640K OK', cls: '', delay: 100 },
+    { text: '[BIOS] Detecting storage devices...', cls: '', delay: 200 },
+    { text: '[BIOS] Found: encrypted_volume "for_xiaoxia" (2.3GB)', cls: 'amber', delay: 300 },
+    { text: '[BIOS] System date: 2026-08-23', cls: '', delay: 200 },
+    { text: '[BIOS] WARNING: This archive was set to unlock after 12 years', cls: 'amber', delay: 400 },
+    { text: '[BIOS] Timer expired. Archive is now accessible.', cls: 'green', delay: 300 },
+    { text: '', cls: '', delay: 200 },
+    { text: 'Loading secure shell...', cls: '', delay: 500 },
+    { text: 'Ready.', cls: 'green', delay: 300 },
+    { text: '', cls: '', delay: 200 },
+  ];
+
+  termBody.innerHTML = '';
+  let i = 0;
+  function nextLine() {
+    if (i >= lines.length) {
+      showLogin();
+      return;
+    }
+    const line = lines[i];
+    const el = document.createElement('div');
+    el.className = 'bios-line ' + line.cls;
+    el.textContent = line.text;
+    el.style.animationDelay = '0s';
+    termBody.appendChild(el);
+    termBody.scrollTop = termBody.scrollHeight;
+    i++;
+    setTimeout(nextLine, line.delay);
+  }
+  nextLine();
+}
+
+// ========== Login Screen ==========
+function showLogin() {
+  currentView = 'login';
+  termBody.innerHTML = `
+    <div class="login-screen">
+      <div class="ascii-art">
+ ╔══════════════════════════════╗
+ ║   📡 MEMORY-00 ARCHIVE       ║
+ ║   信号满格存储系统            ║
+ ╚══════════════════════════════╝</div>
+      <div class="system-title">安全存档 - 身份验证</div>
+      <div class="system-subtitle">此存档于2012年加密 · 2026年8月23日自动解锁</div>
+      <div class="login-form">
+        <div class="field">
+          <label>用户名:</label>
+          <input type="text" id="login-user" autocomplete="off" placeholder="输入用户名...">
+        </div>
+        <div class="field">
+          <label>密码:</label>
+          <input type="password" id="login-pass" autocomplete="off" placeholder="输入密码...">
+        </div>
+        <button class="login-btn" onclick="doLogin()">登 录</button>
+        <div class="login-hint">提示：用户名是爸爸的网名 · 密码是三个平台的首字母</div>
+      </div>
+      <div class="lockout-msg" id="lockout-msg">
+        <div style="font-size:16px;margin-bottom:10px;">⛔ 登录失败次数过多</div>
+        <div>请在 <span class="lockout-timer" id="lockout-timer">10</span> 秒后重试</div>
+      </div>
+    </div>`;
+
+  const userInput = document.getElementById('login-user');
+  const passInput = document.getElementById('login-pass');
+  userInput.focus();
+  [userInput, passInput].forEach(inp => {
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+}
+
+function doLogin() {
+  if (lockedOut) return;
+  const user = document.getElementById('login-user').value;
+  const pass = document.getElementById('login-pass').value;
+
+  if (user === 'memory_00' && pass === 'TYGDWX') {
+    currentUser = 'memory_00';
+    loginSuccess();
+  } else {
+    loginAttempts++;
+    if (loginAttempts >= 3) {
+      lockedOut = true;
+      document.getElementById('login-user').disabled = true;
+      document.getElementById('login-pass').disabled = true;
+      document.getElementById('lockout-msg').classList.add('show');
+      let t = 10;
+      const timer = setInterval(() => {
+        t--;
+        document.getElementById('lockout-timer').textContent = t;
+        if (t <= 0) {
+          clearInterval(timer);
+          lockedOut = false;
+          loginAttempts = 0;
+          document.getElementById('login-user').disabled = false;
+          document.getElementById('login-pass').disabled = false;
+          document.getElementById('lockout-msg').classList.remove('show');
+          document.getElementById('login-pass').value = '';
+          document.getElementById('login-pass').focus();
+        }
+      }, 1000);
+    } else {
+      // Shake effect
+      termBody.style.animation = 'none';
+      void termBody.offsetWidth;
+      const style = document.createElement('style');
+      style.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}';
+      document.head.appendChild(style);
+      termBody.style.animation = 'shake .3s';
+      const passInput = document.getElementById('login-pass');
+      passInput.value = '';
+      passInput.focus();
+      passInput.placeholder = `密码错误 (${loginAttempts}/3)`;
+      passInput.style.borderColor = '#ff4444';
+      setTimeout(() => { passInput.style.borderColor = ''; }, 1500);
+    }
+  }
+}
+
+function loginSuccess() {
+  currentView = 'shell';
+  termBody.innerHTML = '';
+  const welcomeLines = [
+    { text: '', cls: '' },
+    { text: '╔══════════════════════════════════════════╗', cls: 'green' },
+    { text: '║  欢迎回来，memory_00                      ║', cls: 'green' },
+    { text: '║  上次登录：2014-01-15 10:23              ║', cls: 'dim' },
+    { text: '║  系统时间：2026-08-23 00:00              ║', cls: 'dim' },
+    { text: '║  存档已等待：4380天                      ║', cls: 'amber' },
+    { text: '╚══════════════════════════════════════════╝', cls: 'green' },
+    { text: '', cls: '' },
+    { text: '输入 "help" 查看可用命令', cls: 'dim' },
+    { text: '输入 "ls" 查看文件列表', cls: 'dim' },
+    { text: '', cls: '' },
+  ];
+  welcomeLines.forEach((line, i) => {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'output-line ' + line.cls;
+      el.textContent = line.text;
+      termBody.appendChild(el);
+      termBody.scrollTop = termBody.scrollHeight;
+      if (i === welcomeLines.length - 1) {
+        showPrompt();
+      }
+    }, i * 150);
+  });
+}
+
+// ========== Shell ==========
+function showPrompt() {
+  // Remove existing input line
+  const existingPrompt = termBody.querySelector('.prompt-line.active-prompt');
+  if (existingPrompt) existingPrompt.remove();
+
+  const line = document.createElement('div');
+  line.className = 'prompt-line active-prompt';
+  line.innerHTML = `
+    <span class="prompt-symbol">❯</span>
+    <span class="prompt-path">~/archive</span>
+    <input type="text" class="prompt-input" id="prompt-input" autofocus autocomplete="off" spellcheck="false">
+  `;
+  termBody.appendChild(line);
+  const input = document.getElementById('prompt-input');
+  input.focus();
+  input.addEventListener('keydown', handleCommand);
+  termBody.scrollTop = termBody.scrollHeight;
+
+  // Click anywhere to focus
+  termBody.onclick = () => input.focus();
+}
+
+function handleCommand(e) {
+  const input = e.target;
+  if (e.key === 'Enter') {
+    const cmd = input.value.trim();
+    if (!cmd) return;
+    commandHistory.push(cmd);
+    historyIndex = commandHistory.length;
+    processCommand(cmd);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyIndex > 0) {
+      historyIndex--;
+      input.value = commandHistory[historyIndex] || '';
+    }
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      input.value = commandHistory[historyIndex] || '';
+    } else {
+      historyIndex = commandHistory.length;
+      input.value = '';
+    }
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    const partial = input.value;
+    const fileNames = Object.keys(files);
+    const commands = ['help','ls','cat','whoami','signal','dad','爸爸','birthday','clear','date','echo','history','cd'];
+    const all = [...commands, ...fileNames];
+    const match = all.find(c => c.startsWith(partial));
+    if (match) input.value = match;
+  }
+}
+
+function processCommand(cmd) {
+  const parts = cmd.split(/\s+/);
+  const command = parts[0].toLowerCase();
+  const args = parts.slice(1);
+
+  // Replace active prompt with static line
+  const input = document.getElementById('prompt-input');
+  const promptLine = input.closest('.prompt-line');
+  promptLine.innerHTML = `
+    <span class="prompt-symbol">❯</span>
+    <span class="prompt-path">~/archive</span>
+    <span>${cmd}</span>
+  `;
+  promptLine.classList.remove('active-prompt');
+
+  let output = '';
+  switch (command) {
+    case 'help':
+      output = `<div class="output-line amber">可用命令：</div>
+<table class="help-table">
+<tr><td class="cmd">ls</td><td class="desc">列出文件</td></tr>
+<tr><td class="cmd">cat &lt;文件名&gt;</td><td class="desc">查看文件内容</td></tr>
+<tr><td class="cmd">whoami</td><td class="desc">查看当前用户</td></tr>
+<tr><td class="cmd">signal</td><td class="desc">检查信号强度</td></tr>
+<tr><td class="cmd">dad / 爸爸</td><td class="desc">呼叫爸爸</td></tr>
+<tr><td class="cmd">birthday</td><td class="desc">生日快乐</td></tr>
+<tr><td class="cmd">clear</td><td class="desc">清屏</td></tr>
+<tr><td class="cmd">date</td><td class="desc">显示日期</td></tr>
+<tr><td class="cmd">echo &lt;text&gt;</td><td class="desc">回显文字</td></tr>
+<tr><td class="cmd">history</td><td class="desc">命令历史</td></tr>
+<tr><td class="cmd">cd &lt;dir&gt;</td><td class="desc">切换目录</td></tr>
+</table>`;
+      break;
+
+    case 'ls':
+      output = '<div class="file-list">';
+      Object.entries(files).forEach(([name, f]) => {
+        const viewed = viewedFiles.has(name);
+        output += `<div class="file-item" onclick="viewFile('${name}')">
+          <span class="file-icon">${viewed ? '📄' : '📁'}</span>
+          <span class="file-name">${name}</span>
+          <span class="file-size">${f.size}</span>
+          <span class="file-status">${viewed ? '✓ 已读' : '未读'}</span>
+        </div>`;
+      });
+      output += '</div>';
+      output += '<div class="output-line dim" style="margin-top:8px;">点击文件名查看内容 · 共5个文件</div>';
+      break;
+
+    case 'cat':
+      if (args.length === 0) {
+        output = '<div class="output-line error">用法: cat &lt;文件名&gt;</div>';
+      } else {
+        const fileName = args[0];
+        if (files[fileName]) {
+          showFileContent(fileName);
+          return;
+        } else {
+          output = `<div class="output-line error">cat: ${fileName}: 文件不存在</div>`;
+          output += '<div class="output-line dim">可用文件：' + Object.keys(files).join(', ') + '</div>';
+        }
+      }
+      break;
+
+    case 'whoami':
+      output = '<div class="output-line green">你是夏晚，夏建国的女儿。</div>';
+      output += '<div class="output-line dim">memory_00 的唯一继承人。</div>';
+      break;
+
+    case 'signal':
+      showSignalAnimation();
+      return;
+
+    case 'dad':
+    case '爸爸':
+      typeDadReply();
+      return;
+
+    case 'birthday':
+      document.getElementById('birthday-overlay').classList.add('show');
+      return;
+
+    case 'clear':
+      termBody.innerHTML = '';
+      showPrompt();
+      return;
+
+    case 'date':
+      output = '<div class="output-line">2026年8月23日 · 星期日 · 小夏25岁生日</div>';
+      break;
+
+    case 'echo':
+      output = '<div class="output-line">' + args.join(' ') + '</div>';
+      break;
+
+    case 'history':
+      output = commandHistory.map((c, i) =>
+        `<div class="output-line dim">${i+1}  ${c}</div>`
+      ).join('');
+      break;
+
+    case 'cd':
+      output = '<div class="output-line dim">当前目录: ~/archive （没有其他目录了）</div>';
+      break;
+
+    default:
+      output = `<div class="output-line error">命令未找到: ${command}</div>`;
+      output += '<div class="output-line dim">输入 "help" 查看可用命令</div>';
+  }
+
+  if (output) {
+    const outEl = document.createElement('div');
+    outEl.innerHTML = output;
+    termBody.appendChild(outEl);
+  }
+  termBody.scrollTop = termBody.scrollHeight;
+  showPrompt();
+}
+
+// View file
+function viewFile(fileName) {
+  // Remove active prompt
+  const activePrompt = termBody.querySelector('.active-prompt');
+  if (activePrompt) activePrompt.remove();
+  showFileContent(fileName);
+}
+
+function showFileContent(fileName) {
+  const file = files[fileName];
+  if (!file) return;
+  viewedFiles.add(fileName);
+
+  const viewer = document.createElement('div');
+  viewer.className = 'file-viewer';
+  viewer.innerHTML = `
+    <div class="file-header">📄 ${fileName} <span style="color:var(--term-dim);font-size:12px;">(${file.size})</span></div>
+    <div class="file-content-text" id="file-text"></div>
+    <div class="file-back" onclick="closeFile()">← 返回 (输入 ls 查看文件列表)</div>
+  `;
+  termBody.appendChild(viewer);
+  termBody.scrollTop = termBody.scrollHeight;
+
+  // Typewriter effect for content
+  const textEl = document.getElementById('file-text');
+  const content = file.content;
+  let i = 0;
+  // Strip HTML for typing, then render
+  const temp = document.createElement('div');
+  temp.innerHTML = content;
+  const plainText = temp.textContent;
+
+  function typeChar() {
+    if (i < plainText.length) {
+      textEl.textContent = plainText.slice(0, i + 1);
+      i++;
+      termBody.scrollTop = termBody.scrollHeight;
+      setTimeout(typeChar, 15);
+    } else {
+      textEl.innerHTML = content;
+      termBody.scrollTop = termBody.scrollHeight;
+      // Check if all files viewed
+      if (viewedFiles.size === Object.keys(files).length) {
+        setTimeout(showFinalSequence, 1500);
+      } else {
+        showPrompt();
+      }
+    }
+  }
+  typeChar();
+}
+
+function closeFile() {
+  const viewer = termBody.querySelector('.file-viewer');
+  if (viewer) viewer.remove();
+  showPrompt();
+}
+
+// Signal animation
+function showSignalAnimation() {
+  const anim = document.createElement('div');
+  anim.className = 'signal-animation';
+  anim.innerHTML = `
+    <div class="output-line amber" style="text-align:center;">正在检测信号...</div>
+    <div class="signal-bars" id="sig-bars">
+      <div class="bar" style="height:15px;"></div>
+      <div class="bar" style="height:25px;"></div>
+      <div class="bar" style="height:35px;"></div>
+      <div class="bar" style="height:45px;"></div>
+      <div class="bar" style="height:60px;"></div>
+    </div>
+    <div class="signal-label" id="sig-label">连接中...</div>
+  `;
+  termBody.appendChild(anim);
+  termBody.scrollTop = termBody.scrollHeight;
+
+  const bars = anim.querySelectorAll('.bar');
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < bars.length) {
+      bars[i].classList.add('active');
+      i++;
+    } else {
+      clearInterval(interval);
+      document.getElementById('sig-label').textContent = '▓▓▓▓▓ 信号满格';
+      setTimeout(() => {
+        showPrompt();
+      }, 800);
+    }
+  }, 400);
+}
+
+// Dad reply
+function typeDadReply() {
+  const reply = document.createElement('div');
+  reply.className = 'output-line green';
+  reply.style.margin = '8px 0';
+  termBody.appendChild(reply);
+
+  const text = '嗯，爸爸在。';
+  let i = 0;
+  function type() {
+    if (i <= text.length) {
+      reply.textContent = text.slice(0, i);
+      i++;
+      termBody.scrollTop = termBody.scrollHeight;
+      setTimeout(type, 150);
+    } else {
+      showPrompt();
+    }
+  }
+  type();
+}
+
+// Final sequence
+function showFinalSequence() {
+  currentView = 'final';
+  const finalEl = document.createElement('div');
+  finalEl.className = 'final-sequence';
+  finalEl.innerHTML = `
+    <div class="final-signal">📡</div>
+    <div class="signal-full">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="final-text" id="final-text"></div>
+    <div class="final-sub" id="final-sub"></div>
+    <button class="reconnect-btn" onclick="location.reload()">重新连接</button>
+  `;
+  termBody.appendChild(finalEl);
+  termBody.scrollTop = termBody.scrollHeight;
+
+  const finalTexts = [
+    { text: '所有文件已读取。', delay: 500 },
+    { text: '正在断开连接...', delay: 1500 },
+    { text: '连接已断开。', delay: 3000, cls: 'error' },
+    { text: '', delay: 3500 },
+    { text: '信号源：夏建国', delay: 4000 },
+    { text: '状态：永远满格。', delay: 5000 },
+  ];
+
+  finalTexts.forEach(item => {
+    setTimeout(() => {
+      if (item.text) {
+        const p = document.createElement('div');
+        p.textContent = item.text;
+        if (item.cls) p.className = item.cls;
+        document.getElementById('final-text').appendChild(p);
+        termBody.scrollTop = termBody.scrollHeight;
+      }
+    }, item.delay);
+  });
+
+  setTimeout(() => {
+    document.getElementById('final-sub').textContent = '—— 小夏，爸爸为你骄傲 ——';
+  }, 6000);
+}
+
+// Draggable terminal
+const termWindow = document.getElementById('terminal-window');
+const titlebar = document.getElementById('term-titlebar');
+let isDragging = false, dragX = 0, dragY = 0;
+
+titlebar.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  const rect = termWindow.getBoundingClientRect();
+  dragX = e.clientX - rect.left;
+  dragY = e.clientY - rect.top;
+  termWindow.classList.add('dragging');
+  termWindow.style.position = 'fixed';
+  termWindow.style.margin = '0';
+  termWindow.style.left = rect.left + 'px';
+  termWindow.style.top = rect.top + 'px';
+});
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  termWindow.style.left = (e.clientX - dragX) + 'px';
+  termWindow.style.top = (e.clientY - dragY) + 'px';
+});
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  termWindow.classList.remove('dragging');
+});
+
+// Start
+setTimeout(bootSequence, 500);
+</script>
+</body>
+</html>
